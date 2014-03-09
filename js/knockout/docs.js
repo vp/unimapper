@@ -24,6 +24,7 @@ var Docs = function(marked, githubApiUrl) {
     self.contentHeader = ko.observable();
     self.visibleError = ko.observable(false);
     self.contentLoading = ko.observable(false);
+    self.menuLoading = ko.observable(false);
 
     self.clickHideError = function() {
         self.visibleError(false);
@@ -53,6 +54,8 @@ var Docs = function(marked, githubApiUrl) {
 
     self.loadMenu = function() {
 
+        self.menuLoading(true);
+
         $.ajax({
             url: githubApiUrl + "/contents"
         }).fail(function() {
@@ -71,6 +74,8 @@ var Docs = function(marked, githubApiUrl) {
             };
             ko.mapping.fromJS(response, mapping, self.menuItems);
 
+        }).always(function(){
+            self.menuLoading(false);
         });
 
     };

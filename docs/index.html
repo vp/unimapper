@@ -34,15 +34,16 @@
         </div>
         <div id="docs" class="container-fluid">
             <div class="row">
-                <div id="sidebar" class="col-sm-3 col-md-2">
-                    <ul data-bind="foreach: menuItems" class="nav nav-pills text-right">
+                <div id="sidebar" class="col-sm-3 col-md-2 text-right">
+                    <h4 data-bind="css: { hide: menuLoading() === false }"><i class="fa fa-refresh fa-spin"></i> Loading</h4>
+                    <ul data-bind="foreach: menuItems" class="nav nav-pills">
                         <li>
                             <a data-bind="click: $parent.clickMenuItem, attr: { href: url }, css: { active: active === true }, text: title"></a>
                         </li>
                     </ul>
                 </div>
                 <div id="main" class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2">
-                    <i data-bind="css: { hide: contentLoading() === false }" class="fa fa-spinner fa-spin fa-2x"></i>
+                    <i data-bind="css: { hide: contentLoading() === false }" class="fa fa-refresh fa-spin fa-2x"></i>
                     <div data-bind="css: { hide: visibleError() === false }" class="alert alert-danger">
                           <button data-bind="click: clickHideError" aria-hidden="true" class="close" type="button">×</button>
                           <strong>Oh no! You got an error!</strong>
