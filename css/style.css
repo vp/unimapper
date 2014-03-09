@@ -1,0 +1,14 @@
+html, body {
+    background-color: #333333;
+    height: 100%;
+    color: #FFFFFF;
+}
+.jumbotron {
+	background-color: #F09330;
+}
+.jumbotron h1 {
+	color: #FFF8F0;
+}
+.jumbotron p {
+	color: #FFEAD4;
+}
