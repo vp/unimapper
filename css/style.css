@@ -3,12 +3,61 @@ html, body {
     height: 100%;
     color: #FFFFFF;
 }
+a {
+    color: #F5B878;
+}
 .jumbotron {
-	background-color: #F09330;
+    background-color: #F09330;
 }
 .jumbotron h1 {
 	color: #FFF8F0;
 }
 .jumbotron p {
 	color: #FFEAD4;
+}
+#sidebar {
+    background-color: #F09330;
+    border-right: 1px solid #F5B878;
+    bottom: 0;
+    display: block;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px;
+    position: fixed;
+    top: 51px;
+    z-index: 1000;
+}
+#sidebar > .nav {
+    margin-bottom: 20px;
+    margin-left: -20px;
+    margin-right: -21px;
+}
+#sidebar > .nav > li {
+    width: 100%;
+    margin-bottom: 5px;
+}
+#sidebar > .nav > li > a {
+    color: #FFFFFF;
+    border-radius: 0;
+}
+#sidebar > .nav > li > a:hover, #sidebar > .nav > li > a:focus, #sidebar > .nav > li > a:active {
+    background-color: #F5B878;
+}
+#docs #main {
+    padding: 60px;
+}
+#docs #main .page-header {
+    color: #F09330;
+    border-bottom-color: #F09330;
+}
+#docs #main .alert {
+    margin: 40px 0 20px;
+}
+#docs #main #content h3 {
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+#docs #main #content pre {
+    margin-bottom: 50px;
 }
