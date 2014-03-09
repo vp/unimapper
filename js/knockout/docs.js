@@ -35,12 +35,15 @@ var Docs = function(marked, githubApiUrl) {
         self.contentLoading(true);
 
         $.ajax({
-            url: menuItem.url()
+            url: menuItem.url(),
+            headers: {
+                Accept : "application/vnd.github.v3.raw"
+            }
         }).fail(function() {
             self.visibleError(true);
         }).done(function(response) {
             self.contentHeader(menuItem.title());
-            self.content(marked(window.atob(response.content)));
+            self.content(marked(response));
         }).always(function(){
             self.contentLoading(false);
         });
