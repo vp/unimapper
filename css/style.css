@@ -7,7 +7,19 @@ a {
     color: #F5B878;
 }
 .jumbotron {
-    background-color: #F09330;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, #874400),
+        color-stop(1, #F09330)
+    );
+    background-image: -o-linear-gradient(bottom, #874400 0%, #F09330 100%);
+    background-image: -moz-linear-gradient(bottom, #874400 0%, #F09330 100%);
+    background-image: -webkit-linear-gradient(bottom, #874400 0%, #F09330 100%);
+    background-image: -ms-linear-gradient(bottom, #874400 0%, #F09330 100%);
+    background-image: linear-gradient(to bottom, #874400 0%, #F09330 100%);
+    border-bottom: 1px solid #F5B878;
 }
 .jumbotron h1 {
 	color: #FFF8F0;
@@ -16,7 +28,18 @@ a {
 	color: #FFEAD4;
 }
 #sidebar {
-    background-color: #F09330;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        right top,
+        color-stop(0, #874400),
+        color-stop(1, #F09330)
+    );
+    background-image: -o-linear-gradient(right, #874400 0%, #F09330 100%);
+    background-image: -moz-linear-gradient(right, #874400 0%, #F09330 100%);
+    background-image: -webkit-linear-gradient(right, #874400 0%, #F09330 100%);
+    background-image: -ms-linear-gradient(right, #874400 0%, #F09330 100%);
+    background-image: linear-gradient(to right, #874400 0%, #F09330 100%);
     border-right: 1px solid #F5B878;
     bottom: 0;
     display: block;
