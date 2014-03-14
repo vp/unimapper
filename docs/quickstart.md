@@ -1,16 +1,29 @@
 ---
 layout: docs
 title: Quickstart
-next_section: entity
 permalink: /docs/quickstart/
 ---
 
-### What do I need?
-PHP 5.4 and higher
+## Requirements
 
-### Yep, I got it ...
-OK, lets go. First of all, you need to realize your app structure. Maybe you heared about models, active record and stuff like that. Everything you need is:
+<a href="http://php.net">PHP 5.4</a> and higher
 
-- Entity
-- Repository
-- Mapper
+## Download
+
+The best way to download package to your project is [Composer](https://getcomposer.org) with all those nice things it provides.
+
+```shell
+composer require bauer01/unimapper@dev
+```
+
+## Directory structure
+
+First of all, you need to realize your app structure. Maybe you heared about models, active record and stuff like that.
+but it is better to separate logic entities, repository and queries
+
+```shell
+/model
+../entity
+../mapper
+../repository
+```

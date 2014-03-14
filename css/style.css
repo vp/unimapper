@@ -4,7 +4,10 @@ html, body {
     color: #FFFFFF;
 }
 a {
-    color: #F5B878;
+    color: #F09330;
+}
+.navbar {
+    margin-bottom: 0;
 }
 .jumbotron {
     background-image: -webkit-gradient(
@@ -27,7 +30,11 @@ a {
 .jumbotron p {
 	color: #FFEAD4;
 }
-#sidebar {
+.content {
+    min-height: 400px;
+    margin-bottom: 30px;
+}
+.content .sidebar {
     background-image: -webkit-gradient(
         linear,
         left top,
@@ -41,46 +48,62 @@ a {
     background-image: -ms-linear-gradient(right, #874400 0%, #F09330 100%);
     background-image: linear-gradient(to right, #874400 0%, #F09330 100%);
     border-right: 1px solid #F5B878;
-    bottom: 0;
-    display: block;
-    left: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding: 20px;
-    position: fixed;
-    top: 51px;
-    z-index: 1000;
+    padding-right: 0;
+    padding-top: 30px;
+    min-height: 400px;
+
 }
-#sidebar > .nav {
-    margin-bottom: 20px;
-    margin-left: -20px;
-    margin-right: -21px;
+.content .sidebar h3 {
+    padding-right: 15px;
 }
-#sidebar > .nav > li {
-    width: 100%;
-    margin-bottom: 5px;
-}
-#sidebar > .nav > li > a {
+.content .sidebar > .nav > li > a {
     color: #FFFFFF;
     border-radius: 0;
 }
-#sidebar > .nav > li > a:hover, #sidebar > .nav > li > a:focus, #sidebar > .nav > li > a:active {
+.content .sidebar > .nav > li > a:hover, #sidebar > .nav > li > a:focus, #sidebar > .nav > li > a:active {
     background-color: #F5B878;
 }
-#docs #main {
-    padding: 60px;
+.content .main {
+    min-height: 400px;
+    padding-left: 40px;
+    padding-right: 40px;
+    background-color: #FFFFFF;
+    color: #000000;
 }
-#docs #main .page-header {
+.content .main .page-header {
     color: #F09330;
     border-bottom-color: #F09330;
 }
-#docs #main .alert {
+.content .main .alert {
     margin: 40px 0 20px;
 }
-#docs #main #content h3 {
+.content .main h3 {
     margin-top: 50px;
     margin-bottom: 20px;
 }
-#docs #main #content pre {
+.content .main pre {
     margin-bottom: 50px;
+}
+.footer {
+    padding-top: 20px;
+    padding-bottom: 15px;
+    border-top: 1px solid #CCCCCC;
+}
+.github-btn {
+    border: 0 none;
+    overflow: hidden;
+}
+.bs-docs-social {
+    margin-bottom: 20px;
+}
+.bs-docs-social-buttons {
+    display: inline-block;
+    list-style: none outside none;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+.bs-docs-social-buttons li {
+    display: inline-block;
+    line-height: 1;
+    padding: 5px 8px;
 }

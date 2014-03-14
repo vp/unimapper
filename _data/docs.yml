@@ -1,5 +1,6 @@
-- title: Documentation
+- title: Get started
   docs:
-  - home
   - quickstart
   - entity
+  - repository
+  - license
