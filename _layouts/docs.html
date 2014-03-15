@@ -4,8 +4,7 @@ layout: default
 
 {% include navigation.html %}
 
-<div class="content">
-    <div class="row">
+    <div class="content row">
         <div class="sidebar col-md-2 text-right">
             {% for section in site.data.docs %}
                 <h3>{{ section.title }}</h3>
@@ -20,4 +19,3 @@ layout: default
             {{ content }}
         </div>
     </div>
-</div>

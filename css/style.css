@@ -31,8 +31,9 @@ a {
 	color: #FFEAD4;
 }
 .content {
-    min-height: 400px;
+    height: 100%;
     margin-bottom: 30px;
+    border-bottom: 1px solid #CCCCCC;
 }
 .content .sidebar {
     background-image: -webkit-gradient(
@@ -50,7 +51,7 @@ a {
     border-right: 1px solid #F5B878;
     padding-right: 0;
     padding-top: 30px;
-    min-height: 400px;
+    height: 100%;
 
 }
 .content .sidebar h3 {
@@ -64,7 +65,7 @@ a {
     background-color: #F5B878;
 }
 .content .main {
-    min-height: 400px;
+    height: 100%;
     padding-left: 40px;
     padding-right: 40px;
     background-color: #FFFFFF;
@@ -87,7 +88,6 @@ a {
 .footer {
     padding-top: 20px;
     padding-bottom: 15px;
-    border-top: 1px solid #CCCCCC;
 }
 .github-btn {
     border: 0 none;
