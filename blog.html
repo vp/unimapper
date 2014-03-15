@@ -1,0 +1,43 @@
+---
+layout: default
+title: Blog | UniMapper
+permalink: /blog/
+author: all
+---
+
+ {% include navigation.html %}
+
+<div class="content">
+    <div class="container">
+        <div class="page-header">
+            <h1>Blog</h1>
+            <p class="lead">News about development and released versions</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                {% for post in site.posts %}
+                  {% include blog_post.html %}
+                {% endfor %}
+            </div>
+            <div class="col-sm-3 col-sm-offset-1">
+
+                <h4>Recent posts</h4>
+                <ol class="list-unstyled">
+                  {% for post in site.posts limit:5 %}
+                  <li class="{% if page.title == post.title %}current{% endif %}">
+                    <a href="{{ post.url }}">{{ post.title }}</a>
+                  </li>
+                  {% endfor %}
+                  <li>
+                    <a href="/blog/history/">History »</a>
+                  </li>
+                </ol>
+
+                <h4>Categories</h4>
+                {% for category in site.categories %}
+                  <a href="#{{ category | first }}"><span class="label label-primary">{{ category | first }}</span></a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
