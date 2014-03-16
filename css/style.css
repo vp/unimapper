@@ -6,9 +6,27 @@ html, body {
 a {
     color: #F09330;
 }
+a:hover {
+    color: #F5B878;
+    text-decoration: none;
+}
 .navbar {
     margin-bottom: 0;
     border-radius: 0;
+}
+.btn-flat {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0.3);
+    border: medium none;
+    .rounded-corners;
+    box-shadow: none;
+    color: #FFFFFF;
+    font-weight: normal;
+    padding: 10px 20px;
+    text-shadow: none;
+    transition: all 0.5s ease 0s;
+    &hover {
+        background: none repeat scroll 0 0 rgba(0, 0, 0, 0.6);
+    }
 }
 .jumbotron {
     background-image: -webkit-gradient(
@@ -24,6 +42,7 @@ a {
     background-image: -ms-linear-gradient(bottom, #874400 0%, #F09330 100%);
     background-image: linear-gradient(to bottom, #874400 0%, #F09330 100%);
     border-bottom: 1px solid #F5B878;
+    margin-bottom: 0;
 }
 .jumbotron h1 {
 	color: #FFF8F0;
@@ -34,7 +53,6 @@ a {
 .content {
     height: 100%;
     margin-bottom: 30px;
-    border-bottom: 1px solid #CCCCCC;
 }
 .content .sidebar {
     background-image: -webkit-gradient(
