@@ -6,7 +6,7 @@ permalink: /docs/quickstart/
 
 ## Requirements
 
-<a href="http://php.net">PHP 5.4</a> and higher
+<a href="http://php.net">PHP 5.3</a> and higher
 
 ## Download
 
