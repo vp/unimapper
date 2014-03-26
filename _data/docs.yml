@@ -1,6 +1,16 @@
 - title: Get started
   docs:
-  - quickstart
-  - entity
-  - repository
+  - get-started/install
+  - get-started/quickstart
   - license
+
+- title: Api
+  docs:
+  - api/entity
+  - api/repository
+  - api/query
+
+- title: Extensions
+  docs:
+  - extensions/browse
+  - extensions/get-involved

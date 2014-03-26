@@ -1,10 +1,10 @@
 ---
 layout: docs
 title: Entity
-permalink: /docs/entity/
+permalink: /docs/api/entity/
 ---
 
-Entity usually represents a unique object in your application model schema, so you should try to faithfully capture the reality.
+Entity usually represents a unique object in your application model schema with which you are trying to faithfully capture the reality.
 
 ## Simple entity
 The easiest entity can be a simple class with properties that represents a single table record in database for example.
