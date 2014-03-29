@@ -7,8 +7,7 @@ layout: default
     <div class="content row">
         <div class="sidebar col-md-2 text-right">
             {% for section in site.data.docs %}
-                <h3>{{ section.title }}</h3>
-                <hr>
+                <h4>{{ section.title }}</h4>
                 {% include docs_menu.html items=section.docs %}
             {% endfor %}
         </div>

@@ -1,5 +1,5 @@
 <div>
-  <h2><a href="{{ post.url }}">{{ post.title }}</a></h2>
+  <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
   <p>
     {% for category in post.categories %}
       <span class="label label-primary">{{ category }}</span>

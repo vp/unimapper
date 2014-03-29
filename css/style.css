@@ -55,6 +55,7 @@ a:hover {
     margin-bottom: 30px;
 }
 .content .sidebar {
+    font-size: 12px;
     background-image: -webkit-gradient(
         linear,
         left top,
@@ -71,9 +72,11 @@ a:hover {
     padding-right: 0;
     padding-top: 30px;
     height: 100%;
-
 }
-.content .sidebar h3 {
+.content .sidebar h4 {
+    border-bottom: 1px solid #F09330;
+    padding-bottom: 10px;
+    margin-top: 20px;
     padding-right: 15px;
 }
 .content .sidebar > .nav > li > a {
