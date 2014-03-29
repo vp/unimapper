@@ -4,14 +4,51 @@ title: Query
 permalink: /docs/api/query/
 ---
 
-## findAll
+Query gives you a unique way to access your stored data with unite API, wherever they live. It communicates directly with mappers related to entity. The usage itself is very easy with fluent interface.
 
-## findOne
+## Query builder
+All queries are usually registered in query builder object that lives in every repository.
 
-## insert
+## Built-in queries
 
-## update
+#### findAll ( property1, property2 .. )
+Get all records as entity collection. You can use following filters:
+- where()
+- orWhere()
+- whereAre()
+- orwhereAre()
+- limit()
+- offset()
 
-## delete
+### findOne ( `mixed` primaryValue )
+Get single unique record by priamry property value.
 
-## custom
+### insert ( `Entity` $entity )
+Insert a new record
+
+### update ( `array` $data )
+Update record.
+
+- where()
+- orWhere()
+- whereAre()
+- orwhereAre()
+
+### delete ()
+Delete record.
+
+- where()
+- orWhere()
+- whereAre()
+- orwhereAre()
+
+### custom ( `string` mapperName )
+Custom query is designed to call raw queries like REST api call.
+
+- get()
+- post()
+- put()
+- delete()
+- raw()
+
+## Extending queries
