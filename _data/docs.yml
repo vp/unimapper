@@ -6,6 +6,7 @@
 - title: Api
   docs:
   - api/entity
+  - api/collection
   - api/repository
   - api/query
 

@@ -21,6 +21,15 @@ class User extends \UniMapper\Entity
 {}
 ```
 
+### Supported types
+
+**Basic** `string`, `integer`, `boolean`, `double`, `array`
+
+**[DateTime](http://www.php.net/manual/en/class.datetime.php)**
+
+**Entity** *Single entity*
+
+**Entity[]** *Entity collection as UniMapper\EntityCollection*
 
 ### Primary property
 It defines a unique value by which an entity can be identified. Usually some `id` column in your database for example.
