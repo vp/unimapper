@@ -9,6 +9,7 @@
   - api/collection
   - api/repository
   - api/query
+  - api/mapper
 
 - title: Extensions
   docs:
