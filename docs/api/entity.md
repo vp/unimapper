@@ -27,9 +27,9 @@ class User extends \UniMapper\Entity
 
 **[DateTime](http://www.php.net/manual/en/class.datetime.php)**
 
-**Entity** *Single entity*
+**Entity** Single entity
 
-**Entity[]** *Entity collection as UniMapper\EntityCollection*
+**Entity\[\]** Entity collection as `UniMapper\EntityCollection`
 
 ### Primary property
 It defines a unique value by which an entity can be identified. Usually some `id` column in your database for example.
