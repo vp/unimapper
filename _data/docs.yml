@@ -3,13 +3,13 @@
   - get-started/install
   - get-started/quickstart
 
-- title: Api
+- title: Reference
   docs:
-  - api/entity
-  - api/collection
-  - api/repository
-  - api/query
-  - api/mapper
+  - reference/entity
+  - reference/collection
+  - reference/repository
+  - reference/query
+  - reference/mapper
 
 - title: Extensions
   docs:
