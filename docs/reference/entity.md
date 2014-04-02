@@ -47,6 +47,8 @@ class UserDetail extends User
 {}
 ```
 
+### Active entity
+@todo
 
 ## Hybrid entity
 
