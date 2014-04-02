@@ -6,7 +6,6 @@ permalink: /docs/reference/entity/
 
 Entity usually represents a unique object in your application model schema with which you are trying to faithfully capture the reality.
 
-## Simple entity
 The easiest entity can be a simple class with properties that represents a single table record in database for example.
 
 ```php
@@ -34,7 +33,7 @@ class User extends \UniMapper\Entity
 ### Primary property
 It defines a unique value by which an entity can be identified. Usually some `id` column in your database for example.
 
-### Inherited entity
+### Inheritance
 You can even extend entity with a new one. All properties will be inherited too. Just write a {@inheritdoc}.
 
 ```php
@@ -50,7 +49,7 @@ class UserDetail extends User
 ### Active entity
 @todo
 
-## Hybrid entity
+### Hybrid entity
 
 > If possible, please try to avoid this technique during the design phase!
 
