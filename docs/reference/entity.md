@@ -51,7 +51,7 @@ class UserDetail extends User
 
 ### Hybrid entity
 
-> If possible, please try to avoid this technique during the design phase!
+> This feature is experimental!
 
 In some specials cases your entity could represent data stored across the different sources (database, REST api, whatever else ...).
 For example, you have some Order entity that holds some data in local database and some data are stored in external application available through the REST api.
