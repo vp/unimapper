@@ -1,7 +1,9 @@
 - title: Get started
   docs:
   - get-started/install
-  - get-started/quickstart
+  - get-started/describe-your-data
+  - get-started/store-them
+  - get-started/work-with-it
 
 - title: Reference
   docs:
