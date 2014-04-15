@@ -7,24 +7,12 @@ next_section: /get-started/describe-your-data
 
 ## Requirements
 
-<a href="http://php.net">PHP 5.4</a> and higher
+<a href="http://php.net">PHP</a> 5.4+
 
-## Install
+## Download
 
 The best way to download package to your project is [Composer](https://getcomposer.org) with all those nice things it provides.
 
 ```shell
 composer require bauer01/unimapper@dev
-```
-
-## Directory structure
-
-First of all, you need to realize your app structure. Maybe you heared about models, active record and stuff like that.
-but it is better to separate logic entities, repository and queries.
-
-```shell
-/model
-../entity
-../mapper
-../repository
 ```
