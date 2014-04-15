@@ -23,7 +23,7 @@ Get all records as entity collection. You can use following filters:
 ### findOne ( `mixed` primaryValue )
 Get single unique record by priamry property value.
 
-### insert ( `Entity` $entity )
+### insert ( `array` $data )
 Insert a new record
 
 ### update ( `array` $data )
