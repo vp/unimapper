@@ -33,7 +33,69 @@ class User extends \UniMapper\Entity
 ### Primary property
 It defines a unique value by which an entity can be identified. Usually some `id` column in your database for example.
 
-### Inheritance
+### Property validators
+Built your own validation logic on every property. You only need to add `m:validate` filter with validation rule and define the corresponding function like `validationRuleName($value)`.
+
+See the example below.
+
+```php
+/**
+ * @property integer $score m:validate(score)
+ */
+class User extends \UniMapper\Entity
+{
+    public static function validateScore($value)
+    {
+         return $value >= 1 && $value <= 5;
+    }
+}
+
+$user = new User;
+$user->score = 1 // OK
+$user->score = 6 // Throws exception
+```
+
+> Tip! You can even define multiple rules `m:validate(rule1|rule2...)`. Each rule must be met.
+
+There are also some built-in rules: `url`, `email`, `ipv4`, `ipv6`.
+
+### Computed property
+A kind of virtual property, mostly dependent on other real properties so it is readonly and can not be set directly. It can be helpful in situations like price computing for example.
+
+```php
+
+/**
+ * @property double $price
+ */
+class Product extends \UniMapper\Entity
+{}
+
+/**
+ * @property Product[] $products
+ * @property double    $price    m:computed
+ */
+class Order extends \UniMapper\Entity
+{
+    protected function computePrice()
+    {
+    	$price = 0;
+    	foreach ($this->products as $product) {
+    	    $price += $product->price;
+    	}
+        return $price;
+    }
+}
+
+$order = new Order;
+$order->products[] = Product::create(["price" => 5.0]);
+echo $order->price; // Will be 5.0
+$order->products[] = Product::create(["price" => 10.0]);
+echo $order->price; // Will be 15.0
+```
+
+> Warning! Remember, computed propety can not be mixed with other filters.
+
+### Entity inheritance
 You can even extend entity with a new one. All properties will be inherited too. Just write a {@inheritdoc}.
 
 ```php
