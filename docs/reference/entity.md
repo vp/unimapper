@@ -26,7 +26,7 @@ class User extends \UniMapper\Entity
 
 **[DateTime](http://www.php.net/manual/en/class.datetime.php)**
 
-**Entity** Single entity
+**Entity** Single entity, named according to your [naming conventions]({{ site.baseurl }}/docs/reference/naming-conventions/)
 
 **Entity\[\]** Entity collection as `UniMapper\EntityCollection`
 
@@ -93,7 +93,7 @@ $order->products[] = Product::create(["price" => 10.0]);
 echo $order->price; // Will be 15.0
 ```
 
-> Warning! Remember, computed propety can not be mixed with other filters.
+> Remember! Computed property can not be mixed with other filters.
 
 ### Entity inheritance
 You can even extend entity with a new one. All properties will be inherited too. Just write a {@inheritdoc}.
