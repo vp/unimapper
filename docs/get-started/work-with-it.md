@@ -17,7 +17,7 @@ class Order extends \UniMapper\Repository
 {
     public function findAll()
     {
-        return $this->createQuery("Order")->findAll()->execute();
+        return $this->query()->findAll()->execute();
     }
 }
 ```
