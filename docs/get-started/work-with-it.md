@@ -9,8 +9,7 @@ Nice! You are almost at the finish. You only need to load orders now. It can be 
 
 **/model/repository/Order.php**
 
-```php
-
+~~~ php
 namespace MyApp\Model\Repository;
 
 class Order extends \UniMapper\Repository
@@ -20,17 +19,17 @@ class Order extends \UniMapper\Repository
         return $this->query()->findAll()->execute();
     }
 }
-```
+~~~
 
 **/index.php**
 
-```php
+~~~ php
 $orders = new MyApp\Model\Repository\Order;
 $orders->registerMapper($databaseMapper);
 
 foreach ($orders->findAll() as $order) {
 	echo $order->company;
 }
-```
+~~~
 
 Now you can go home, the work is done for today! ;-)

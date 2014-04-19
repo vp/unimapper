@@ -13,6 +13,6 @@ next_section: /get-started/describe-your-data
 
 The best way to download package to your project is [Composer](https://getcomposer.org) with all those nice things it provides.
 
-```shell
+~~~ shell
 composer require bauer01/unimapper@dev
-```
+~~~

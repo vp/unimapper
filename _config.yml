@@ -2,3 +2,4 @@ name: UniMapper
 highlighter: pygments
 relative_permalinks: false
 baseurl: /unimapper
+markdown: kramdown

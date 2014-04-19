@@ -12,31 +12,31 @@ In this case we prefer a database so choosing our favorite [Dibi]({{ site.baseur
 
 **index.php**
 
-```php
+~~~ php
 $connection = new \DibiConnection(["driver" => "mysql", "host" => "localhost", "db" => "mydb"]);
 $databaseMapper = new UniMapper\Mapper\DibiMapper($connection, "Database");
-```
+~~~
 
 Now you have defined mapper with database connection. But must tell your entities how to map. It can be done with `m:map()` definition. Complete your entities like this ..
 
 **/model/entity/User.php**
 
-```php
+~~~ php
  * @mapper Database(users)
  *
  * @property integer  $id        m:map(Database:) m:primary
  * @property string   $username  m:map(Database:)
  * @property DateTime $createdOn m:map(Database:)
-```
+~~~
 
 .. and this.
 
 **/model/entity/Order.php**
 
-```php
+~~~ php
  * @mapper Database(orders)
  *
  * @property string   $code      m:map(Database:) m:primary
  * @property string   $company   m:map(Database:)
  * @property DateTime $createdOn m:map(Database:)
-```
+~~~

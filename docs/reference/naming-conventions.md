@@ -8,11 +8,12 @@ Naming conventions are neccesary if your want to have your [entities]({{ site.ba
 Just define your mask with `*`.
 
 **Example:**
-```php
+
+~~~ php
 use UniMapper\NamingConventions;
 
 NamingConventions::$entityMask = "YourApp\Model\Entity\*"; // Default is 'Model\Entity\*'
 NamingConventions::$repositoryMask = "YourApp\Model\Repository\*Repository"; // Default is 'Model\Repository\*Repository'
-```
+~~~
 
 > Remember! These settings must be set before you start using the orm.

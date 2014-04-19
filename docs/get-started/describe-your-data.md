@@ -19,20 +19,20 @@ And you should answer:
 First of all, you need to realize your app structure. Maybe you heared about models, active record and stuff like that.
 but it is better to separate logic entities, repository and queries.
 
-```shell
+~~~ shell
 index.php
 /model
 ../entity
 ../mapper
 ../repository
-```
+~~~
 
 ## Entities
 Then you must describe objects you will work with. These objects are called [entities]({{ site.baseurl }}/docs/reference/entity/) and as your boss said, there are users ..
 
 **/model/entity/User.php**
 
-```php
+~~~ php
 namespace MyApp\Model\Entity;
 
 /**
@@ -42,13 +42,13 @@ namespace MyApp\Model\Entity;
  */
 class User extends \UniMapper\Entity
 {}
-```
+~~~
 
 .. and they want to see orders.
 
 **/model/entity/Order.php**
 
-```php
+~~~ php
 namespace MyApp\Model\Entity;
 
 /**
@@ -58,4 +58,4 @@ namespace MyApp\Model\Entity;
  */
 class Order extends \UniMapper\Entity
 {}
-```
+~~~
