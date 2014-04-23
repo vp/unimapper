@@ -86,9 +86,14 @@ class Order extends \UniMapper\Entity
 }
 
 $order = new Order;
-$order->products[] = Product::create(["price" => 5.0]);
+$product1 = new Product;
+$product1->price = 5.0;
+$order->products[] = $product1;
 echo $order->price; // Will be 5.0
-$order->products[] = Product::create(["price" => 10.0]);
+
+$product2 = new Product;
+$product2->price = 10.0;
+$order->products[] = $product2;
 echo $order->price; // Will be 15.0
 ~~~
 
