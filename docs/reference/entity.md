@@ -12,9 +12,9 @@ The easiest entity can be a simple class with properties that represents a singl
 /**
  * @mapper Database(table_name)
  *
- * @property integer  $id        m:map(Database:) m:primary
- * @property string   $username  m:map(Database:)
- * @property DateTime $createdOn m:map(Database:)
+ * @property integer  $id        m:primary
+ * @property string   $username
+ * @property DateTime $createdOn
  */
 class User extends \UniMapper\Entity
 {}
@@ -31,7 +31,21 @@ class User extends \UniMapper\Entity
 **Entity\[\]** Entity collection as `UniMapper\EntityCollection`
 
 ### Primary property
-It defines a unique value by which an entity can be identified. Usually some `id` column in your database for example.
+Very important is `m:primary` as [primary property](#primary-property), because it represents some kind of *foreign key* similar to relational database and every entity can be identified by it. Usually some `id` column in your database for example.
+
+### Mapping
+You can tell entity how to map your data.
+
+~~~ php
+/**
+ * @mapper MyMapper(table_name)
+ *
+ * @property integer $id   m:primary
+ * @property string  $text m:map(text_column_name)
+ */
+class MyEntity extends \UniMapper\Entity
+{}
+~~~
 
 ### Property validators
 Built your own validation logic on every property. You only need to add `m:validate` filter with validation rule and define the corresponding function like `validationRuleName($value)`.
@@ -106,7 +120,7 @@ You can even extend entity with a new one. All properties will be inherited too.
 /**
  * {@inheritdoc}
  *
- * @property string $fullName  m:map(Database:)
+ * @property string $fullName
  */
 class UserDetail extends User
 {}
@@ -114,26 +128,3 @@ class UserDetail extends User
 
 ### Active entity
 @todo
-
-### Hybrid entity
-
-> This feature is experimental!
-
-In some specials cases your entity could represent data stored across the different sources (database, REST api, whatever else ...).
-For example, you have some Order entity that holds some data in local database and some data are stored in external application available through the REST api.
-
-~~~ php
-/**
- * @mapper Database(table_name)
- * @mapper RestApi(resource)
- *
- * @property integer  $id         m:map(RestApi:apiRowWithId|Database:) m:primary
- * @property string   $note       m:map(RestApi:)
- * @property User     $assignedTo m:map(Database:)
- * @property DateTime $createdOn  m:map(Database:)
- */
-class Order extends \UniMapper\Entity
-{}
-~~~
-
-Very important is `m:primary` as [primary property](#primary-property), because it represents some kind of *foreign key* similar to relational database.

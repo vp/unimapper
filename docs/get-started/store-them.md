@@ -17,16 +17,16 @@ $connection = new \DibiConnection(["driver" => "mysql", "host" => "localhost", "
 $databaseMapper = new UniMapper\Mapper\DibiMapper($connection, "Database");
 ~~~
 
-Now you have defined mapper with database connection. But must tell your entities how to map. It can be done with `m:map()` definition. Complete your entities like this ..
+Now you have defined mapper with database connection. But you must tell your entities how to connect. It can be done with `@mapper` definition. Complete your entities like this.
 
 **/model/entity/User.php**
 
 ~~~ php
  * @mapper Database(users)
  *
- * @property integer  $id        m:map(Database:) m:primary
- * @property string   $username  m:map(Database:)
- * @property DateTime $createdOn m:map(Database:)
+ * @property integer  $id        m:primary
+ * @property string   $username
+ * @property DateTime $createdOn
 ~~~
 
 .. and this.
@@ -36,7 +36,7 @@ Now you have defined mapper with database connection. But must tell your entitie
 ~~~ php
  * @mapper Database(orders)
  *
- * @property string   $code      m:map(Database:) m:primary
- * @property string   $company   m:map(Database:)
- * @property DateTime $createdOn m:map(Database:)
+ * @property string   $code      m:primary
+ * @property string   $company
+ * @property DateTime $createdOn
 ~~~
