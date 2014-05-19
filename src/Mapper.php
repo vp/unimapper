@@ -22,6 +22,9 @@ abstract class Mapper implements Mapper\IMapper
     /** @var \UniMapper\Cache\ICache */
     protected $cache;
 
+    /** @var boolean $schema Usefull for migration */
+    protected $schema = true;
+
     public function __construct($name)
     {
         $this->name = (string) $name;
@@ -261,6 +264,11 @@ abstract class Mapper implements Mapper\IMapper
             $data[$index] = $this->unmapEntity($entity);
         }
         return $data;
+    }
+
+    public function migrateEntity(Entity $old, Entity $new)
+    {
+
     }
 
 }
