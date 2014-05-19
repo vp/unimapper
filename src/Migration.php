@@ -16,8 +16,8 @@ class Migration
     /** @var string */
     private $dataDir;
 
-    /** @var array */
-    private $entities = [];
+    /** @var array $schema List of reflections from registered entities */
+    private $schema = [];
 
     public function __construct($dataDir)
     {
@@ -29,10 +29,10 @@ class Migration
 
     public function registerEntity($name)
     {
-        if (isset($this->entities[$name])) {
+        if (isset($this->schema[$name])) {
             throw new MigrationException("Entity with name '" . $name . "' already registered!");
         }
-        $this->entities[$name] = new Reflection\Entity(NC::nameToClass($name, NC::$entityMask));
+        $this->schema[$name] = new Reflection\Entity(NC::nameToClass($name, NC::$entityMask));
     }
 
     public function registerMapper(Mapper $mapper)
@@ -56,30 +56,29 @@ class Migration
             }
         }
 
-        $newSchema = [];
+        // Find changes
         $changes = [];
-
-        foreach ($this->entities as $name => $reflection) {
-
-            $newSchema[$name] = serialize($reflection);
-
-            // Find changes
-            if (!empty($originalSchema)) {
-                $changes = $this->generateChanges($originalSchema, $newSchema);
-            }
+        if (!empty($originalSchema)) {
+            $changes = $this->generateChanges($originalSchema, $this->schema);
         }
 
         // Write new schema
-        $this->saveFile($schemaFile, $newSchema);
+        $newSchema = [];
+        foreach ($this->schema as $name => $reflection) {
+            $newSchema[$name] = serialize($reflection);
+        }
+        if (!empty($newSchema)) {
+            $this->saveFile($schemaFile, $newSchema);
+        }
     }
 
-    private function generateChanges(array $original, array $new)
+    private function generateChanges(array $originalSchema, Reflection\Entity $newReflection)
     {
-        foreach ($original as $originalEntityName => $originalEntityReflection) {
+        foreach ($originalSchema as $originalEntityName => $originalEntityReflection) {
 
             if (isset($new[$originalEntityName])) {
                 // Find properties changes
-                foreach ()
+                //dump($new[$originalEntityName]->);
 
             }
         }
