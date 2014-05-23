@@ -17,7 +17,7 @@ use UniMapper\Validator,
  * Entity is ancestor for all entities and provides global methods, which
  * can be used in every new entity object.
  */
-abstract class Entity implements \JsonSerializable, \Serializable
+abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
 {
 
     /** Validator trait */
@@ -34,6 +34,9 @@ abstract class Entity implements \JsonSerializable, \Serializable
 
     /** @var \UniMapper\Cache\ICache $cache */
     private $cache;
+
+    /** @var string $iteratorPosition As property name */
+    private $iteratorPosition;
 
     public function __construct(ICache $cache = null, Reflection\Entity $reflection = null)
     {
@@ -67,6 +70,8 @@ abstract class Entity implements \JsonSerializable, \Serializable
                 $this->reflection = new Reflection\Entity($className);
             }
         }
+
+//        $this->rewind();
     }
 
     /**
@@ -322,6 +327,14 @@ abstract class Entity implements \JsonSerializable, \Serializable
         return $vars;
     }
 
+    private function getAllPropertyNames()
+    {
+        return array_merge(
+            array_keys($this->reflection->getProperties()),
+            array_keys($this->getPublicVars())
+        );
+    }
+
     /**
      * Convert to json representation of entity collection
      *
@@ -352,6 +365,33 @@ abstract class Entity implements \JsonSerializable, \Serializable
             }
         }
         return $this;
+    }
+
+    function rewind()
+    {
+        $this->position = $this->getAllPropertyNames()[0];
+    }
+
+    function current()
+    {
+        return $this->{$this->position};
+    }
+
+    function key()
+    {
+        return $this->position;
+    }
+
+    function next()
+    {
+        $properties = $this->getAllPropertyNames();
+        next($properties);
+        $this->iteratorPosition = current($properties);
+    }
+
+    function valid()
+    {
+        return isset($this->array[$this->position]);
     }
 
 }
