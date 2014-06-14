@@ -4,6 +4,7 @@ namespace UniMapper\Query;
 
 use UniMapper\Exceptions\QueryException,
     UniMapper\Reflection,
+    UniMapper\Reflection\Entity\Property\Association\BelongsToMany,
     UniMapper\Reflection\Entity\Property\Association\HasMany,
     UniMapper\EntityCollection,
     UniMapper\Mapper,
@@ -109,8 +110,10 @@ class FindAll extends \UniMapper\Query implements IConditionable
 
                 if ($association instanceof HasMany) {
                     $associated[$propertyName] = $this->hasMany($mapper, $this->mappers[$association->getTargetMapperName()], $association, $primaryValues);
+                } elseif ($association instanceof HasOne) {
+                    $associated[$propertyName] = $this->belongsToMany($this->mappers[$association->getTargetMapperName()], $association, $primaryValues);
                 } else {
-                    throw new QueryException("Unsupported association " . get_class($association) . "!");
+                    throw new QueryException("Unsupported remote association " . get_class($association) . "!");
                 }
             }
 
@@ -217,6 +220,21 @@ class FindAll extends \UniMapper\Query implements IConditionable
                 }
                 $result[$originKey][] = $targetResult[$targetKey];
             }
+        }
+
+        return $result;
+    }
+
+    private function belongsToMany(Mapper $targetMapper, BelongsToMany $association, array $primaryValues)
+    {
+        $result = $targetMapper->findAll(
+             $association->getTargetResource(),
+             [], // @todo
+             [[$association->getForeignKey(), "IN", array_keys($primaryValues), "AND"]]
+        );
+
+        if (!$result) {
+            return [];
         }
 
         return $result;
