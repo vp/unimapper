@@ -32,20 +32,23 @@ class FindAll extends \UniMapper\Query implements IConditionable
 
     public function associate($propertyName)
     {
-        if (!isset($this->entityReflection->getProperties()[$propertyName])) {
-            throw new QueryException("Property '" . $propertyName . "' not defined!");
-        }
+        foreach (func_get_args() as $name) {
 
-        $property = $this->entityReflection->getProperties()[$propertyName];
-        if (!$property->isAssociation()) {
-            throw new QueryException("Property '" . $propertyName . "' is not defined as association!");
-        }
+            if (!isset($this->entityReflection->getProperties()[$name])) {
+                throw new QueryException("Property '" . $name . "' not defined!");
+            }
 
-        $association = $property->getAssociation();
-        if ($association->isRemote()) {
-            $this->associations["remote"][$property->getName()] = $association;
-        } else {
-            $this->associations["local"][$property->getName()] = $association;
+            $property = $this->entityReflection->getProperties()[$name];
+            if (!$property->isAssociation()) {
+                throw new QueryException("Property '" . $name . "' is not defined as association!");
+            }
+
+            $association = $property->getAssociation();
+            if ($association->isRemote()) {
+                $this->associations["remote"][$property->getName()] = $association;
+            } else {
+                $this->associations["local"][$property->getName()] = $association;
+            }
         }
 
         return $this;
