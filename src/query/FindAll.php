@@ -45,9 +45,9 @@ class FindAll extends \UniMapper\Query implements IConditionable
 
             $association = $property->getAssociation();
             if ($association->isRemote()) {
-                $this->associations["remote"][$property->getName()] = $association;
+                $this->associations["remote"][$name] = $association;
             } else {
-                $this->associations["local"][$property->getName()] = $association;
+                $this->associations["local"][$name] = $association;
             }
         }
 
