@@ -302,6 +302,7 @@ class Mapper
                 $property = $reflection->getProperty($name);
                 $unmappedName = $property->getUnmapped();
 
+
                 foreach ($item as $modifier => $value) {
 
                     if ($property->getType() !== Reflection\Property::TYPE_ARRAY
