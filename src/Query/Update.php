@@ -38,14 +38,8 @@ class Update extends \UniMapper\Query
             $this->reflection->getAdapterResource(),
             $values
         );
-        if ($this->filter) {
-            $query->setFilter(
-                $mapper->unmapFilter(
-                    $this->reflection,
-                    $this->filter
-                )
-            );
-        }
+
+        $this->setQueryFilters($this->filter, $query, $connection);
 
         return (int) $adapter->execute($query);
     }

@@ -13,14 +13,9 @@ class Count extends \UniMapper\Query
         $query = $adapter->createCount(
             $this->reflection->getAdapterResource()
         );
-        if ($this->filter) {
-            $query->setFilter(
-                $connection->getMapper()->unmapFilter(
-                    $this->reflection,
-                    $this->filter
-                )
-            );
-        }
+
+        $this->setQueryFilters($this->filter, $query, $connection);
+
         return (int) $adapter->execute($query);
     }
 

@@ -341,6 +341,12 @@ class EntityFilterTest extends TestCase
         Filter::validate(Reflection::load("Entity"), ["id" => [Filter::EQUAL => ["foo"]]]);
     }
 
+
+    public function testValidateNestedJoid()
+    {
+        Filter::validate(Reflection::load("Simple"), ["nested.id" => [Filter::EQUAL => ["foo"]]]);
+    }
+
 }
 
 /**

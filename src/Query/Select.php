@@ -63,14 +63,7 @@ class Select extends \UniMapper\Query
             $this->offset
         );
 
-        if ($this->filter) {
-            $query->setFilter(
-                $mapper->unmapFilter(
-                    $this->reflection,
-                    $this->filter
-                )
-            );
-        }
+        $this->setQueryFilters($this->filter, $query, $connection);
 
         if ($this->adapterAssociations) {
             $query->setAssociations($this->adapterAssociations);
