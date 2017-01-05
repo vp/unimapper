@@ -112,15 +112,24 @@ class ManyToMany extends Association
         );
 
         $targetQuery = $targetAdapter->createSelect(
-            $this->targetReflection->getAdapterResource()
+            $this->targetReflection->getAdapterResource(),
+            $this->getTargetSelection()
         );
-        $targetQuery->setFilter(
-            [
-                $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
-                    Entity\Filter::EQUAL => array_keys($joinResult)
-                ]
+
+        $filter =  [
+            $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
+                Entity\Filter::EQUAL => array_keys($joinResult)
             ]
-        );
+        ];
+
+        if ($this->getTargetFilter()) {
+            $filter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
+                $filter
+            );
+        }
+
+        $targetQuery->setFilter($filter);
 
         $targetResult = $targetAdapter->execute($targetQuery);
         if (!$targetResult) {

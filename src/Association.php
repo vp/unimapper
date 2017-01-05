@@ -21,6 +21,12 @@ class Association
     /** @var Reflection */
     protected $targetReflection;
 
+    /** @var  array */
+    protected $targetSelection = [];
+
+    /** @var array array */
+    protected $targetFilter = [];
+
     /**
      * @param Reflection $sourceReflection
      * @param Reflection $targetReflection
@@ -93,6 +99,26 @@ class Association
             default:
                 throw new AssociationException("Unsupported association type");
         }
+    }
+
+    public function getTargetSelection()
+    {
+        return $this->targetSelection;
+    }
+
+    public function setTargetSelection(array $targetSelection)
+    {
+        $this->targetSelection = $targetSelection;
+    }
+
+    public function getTargetFilter()
+    {
+        return $this->targetFilter;
+    }
+
+    public function setTargetFilter(array $filter)
+    {
+        $this->targetFilter = $filter;
     }
 
     /**

@@ -54,16 +54,24 @@ class ManyToOne extends Association
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
 
         $query = $targetAdapter->createSelect(
-            $this->targetReflection->getAdapterResource()
+            $this->targetReflection->getAdapterResource(),
+            $this->getTargetSelection()
         );
 
-        $query->setFilter(
-            [
-                $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
-                    Filter::EQUAL => $primaryValues
-                ]
+        $filter = [
+            $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
+                Filter::EQUAL => $primaryValues
             ]
-        );
+        ];
+
+        if ($this->getTargetFilter()) {
+            $filter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
+                $filter
+            );
+        }
+
+        $query->setFilter($filter);
 
         $result = $targetAdapter->execute($query);
 

@@ -42,16 +42,24 @@ class OneToMany extends Association
         );
 
         $query = $targetAdapter->createSelect(
-            $this->targetReflection->getAdapterResource()
+            $this->targetReflection->getAdapterResource(),
+            $this->getTargetSelection()
         );
 
-        $query->setFilter(
-            [
-                $this->referencedKey => [
-                    Entity\Filter::EQUAL => array_values($primaryValues)
-                ]
+        $filter = [
+            $this->referencedKey => [
+                Entity\Filter::EQUAL => array_values($primaryValues)
             ]
-        );
+        ];
+
+        if ($this->getTargetFilter()) {
+            $filter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
+                $filter
+            );
+        }
+
+        $query->setFilter($filter);
 
         $result = $targetAdapter->execute($query);
 

@@ -10,6 +10,10 @@ use UniMapper\Entity\Reflection\Property\Option\Assoc;
 trait Selectable
 {
 
+    public static $KEY_SELECTION = 'selection';
+    public static $KEY_FILTER = 'filter';
+    public static $KEY_SELECTION_FULL = 'full';
+
     /** @var array */
     protected $adapterAssociations = [];
 
@@ -27,7 +31,15 @@ trait Selectable
                 $arg = [$arg];
             }
 
-            foreach ($arg as $name) {
+            foreach ($arg as $key => $name) {
+
+                $selection = null;
+                $filter = null;
+                if (is_string($key) && is_array($name)) {
+                    $selection = isset($name[self::$KEY_SELECTION]) ? $name[self::$KEY_SELECTION] : [];
+                    $filter = isset($name[self::$KEY_FILTER]) ? $name[self::$KEY_FILTER] : [];
+                    $name = $key;
+                }
 
                 if (!$this->reflection->hasProperty($name)) {
                     throw new Exception\QueryException(
@@ -45,14 +57,36 @@ trait Selectable
                     );
                 }
 
+
+                /** @var Assoc $option */
                 $option = $property->getOption(Assoc::KEY);
 
                 if ($option->getSourceReflection()->getAdapterName() === $option->getTargetReflection()->getAdapterName()) {
-                    $this->adapterAssociations[$name] = $option;
+                    $association = $this->adapterAssociations[$name] = $option;
                 } else {
-                    $this->remoteAssociations[$name] = Association::create(
+                    $association = $this->remoteAssociations[$name] = Association::create(
                         $option
                     );
+                }
+
+                if ($selection) {
+                    if (is_string($selection)) {
+                        if (is_string($selection)) {
+                            switch ($selection) {
+                                case self::$KEY_SELECTION_FULL:
+                                    $selection = [];
+                                    foreach ($option->getTargetReflection()->getProperties() as $property) {
+                                        $selection[] = $property->getName(true);
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    $association->setTargetSelection($selection);
+                }
+
+                if ($filter) {
+                    $association->setTargetFilter($filter);
                 }
             }
         }
