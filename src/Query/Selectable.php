@@ -61,7 +61,7 @@ trait Selectable
                 /** @var Assoc $option */
                 $option = $property->getOption(Assoc::KEY);
 
-                if ($option->getSourceReflection()->getAdapterName() === $option->getTargetReflection()->getAdapterName()) {
+                if ($option->isRemote()) {
                     $association = $this->adapterAssociations[$name] = $option;
                 } else {
                     $association = $this->remoteAssociations[$name] = Association::create(

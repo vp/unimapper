@@ -98,8 +98,14 @@ class Assoc implements IOption
      */
     public function isRemote()
     {
+        // optional checkout through definition
+        if (isset($this->definition['remote'])) {
+            return $this->definition['remote'] === 'true' || is_int($this->definition['remote']) ? (bool) $this->definition['remote'] : false;
+        }
+        // default behaviour
+
         return $this->sourceReflection->getAdapterName()
-        !== $this->targetReflection->getAdapterName();
+            !== $this->targetReflection->getAdapterName();
     }
 
     public static function create(
