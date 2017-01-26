@@ -23,6 +23,26 @@ trait Selectable
     /** @var array */
     protected $selection = [];
 
+    /**
+     * @return Association[]
+     */
+    public function getLocalAssociations()
+    {
+        return $this->associations['local'];
+    }
+
+    /**
+     * @return Association[]
+     */
+    public function getRemoteAssociations() {
+        return $this->associations['remote'];
+    }
+
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
     public function associate($args)
     {
         foreach (func_get_args() as $arg) {
@@ -121,56 +141,6 @@ trait Selectable
         }
 
         return $this;
-    }
-
-    protected function createSelection()
-    {
-        if (empty($this->selection)) {
-
-            $selection = [];
-            foreach ($this->entityReflection->getProperties() as $property) {
-
-                // Exclude associations & computed properties
-                if (!$property->hasOption(Reflection\Property::OPTION_ASSOC)
-                    && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
-                ) {
-                    $selection[] = $property->getName(true);
-                }
-            }
-        } else {
-
-            // Add properties from filter
-            $selection = $this->selection;
-
-            // Include primary automatically if not provided
-            if ($this->entityReflection->hasPrimary()) {
-
-                $primaryName = $this->entityReflection
-                    ->getPrimaryProperty()
-                    ->getName();
-
-                if (!in_array($primaryName, $selection)) {
-                    $selection[] = $primaryName;
-                }
-            }
-
-            // Unmap all names
-            foreach ($selection as $index => $name) {
-                $selection[$index] = $this->entityReflection->getProperty($name)->getName(true);
-            }
-        }
-
-        // Add required keys from remote associations
-        foreach ($this->associations["remote"] as $association) {
-
-            if (($association instanceof Association\ManyToOne || $association instanceof Association\OneToOne)
-                && !in_array($association->getReferencingKey(), $selection, true)
-            ) {
-                $selection[] = $association->getReferencingKey();
-            }
-        }
-
-        return $selection;
     }
 
 }

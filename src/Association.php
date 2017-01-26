@@ -55,6 +55,15 @@ abstract class Association
         }
     }
 
+    /**
+     * @internal
+     * @return array
+     */
+    public function getMapBy()
+    {
+        return $this->mapBy;
+    }
+
     public function getPrimaryKey()
     {
         return $this->sourceReflection->getPrimaryProperty()->getName(true);

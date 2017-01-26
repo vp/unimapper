@@ -50,7 +50,8 @@ class SelectOne extends \UniMapper\Query
             $connection->getMapper()->unmapValue(
                 $primaryProperty,
                 $this->primaryValue
-            )
+            ),
+            $adapter->createSelection($this)
         );
 
         if ($this->associations["local"]) {

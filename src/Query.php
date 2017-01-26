@@ -25,6 +25,14 @@ abstract class Query
         $this->entityReflection = $reflection;
     }
 
+    /**
+     * @return \UniMapper\Entity\Reflection
+     */
+    public function getEntityReflection()
+    {
+        return $this->entityReflection;
+    }
+
     public function __get($name)
     {
         return $this->{$name};
