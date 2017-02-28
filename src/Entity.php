@@ -432,14 +432,16 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
             }
         }
 
-        return array_merge($output, $this->_getPublicPropertyValues());
+        return array_merge($output, $this->_getPublicPropertyValues(true));
     }
 
-    private function _getPublicPropertyValues()
+    private function _getPublicPropertyValues($includeNotSet = true)
     {
         $result = [];
         foreach (Entity\Reflection::load(get_called_class())->getPublicProperties() as $name) {
-            $result[$name] = $this->{$name};
+            if ($includeNotSet || isset($this->{$name})) {
+                $result[$name] = $this->{$name};
+            }
         }
         return $result;
     }
@@ -454,20 +456,23 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
         $output = [];
         foreach (Entity\Reflection::load(get_called_class())->getProperties() as $propertyName => $property) {
 
-            $value = $this->{$propertyName};
-            if ($value instanceof Entity\Collection || $value instanceof Entity) {
-                $output[$propertyName] = $value->jsonSerialize();
-            } elseif ($value instanceof \DateTime
-                && $property->getType() === Entity\Reflection\Property::TYPE_DATE
-            ) {
-                $output[$propertyName] = (array) $value;
-                $output[$propertyName]["date"] = $value->format(self::$dateFormat);
-            } else {
-                $output[$propertyName] = $value;
+            // get only properties witch was really set
+            if (array_key_exists($propertyName, $this->data)) {
+                $value = $this->{$propertyName};
+                if ($value instanceof Entity\Collection || $value instanceof Entity) {
+                    $output[$propertyName] = $value->jsonSerialize();
+                } elseif ($value instanceof \DateTime
+                    && $property->getType() === Entity\Reflection\Property::TYPE_DATE
+                ) {
+                    $output[$propertyName] = (array)$value;
+                    $output[$propertyName]["date"] = $value->format(self::$dateFormat);
+                } else {
+                    $output[$propertyName] = $value;
+                }
             }
         }
 
-        return array_merge($output, $this->_getPublicPropertyValues());
+        return array_merge($output, $this->_getPublicPropertyValues(false));
     }
 
     public function rewind()
