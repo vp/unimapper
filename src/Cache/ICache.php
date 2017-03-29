@@ -14,8 +14,11 @@ interface ICache
           SLIDING = "sliding",
           TAGS = "tags";
 
-    public function load($key);
+    const TAG_QUERY = "query",
+          TAG_REFLECTION = "reflection";
 
-    public function save($key, $data, array $options = []);
+    public function load(\UniMapper\Query\ICachableQuery $query);
+
+    public function save(\UniMapper\Query\ICachableQuery $query, $data, array $options = []);
 
 }

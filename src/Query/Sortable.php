@@ -10,6 +10,15 @@ trait Sortable
 
     protected $orderBy = [];
 
+    /**
+     * @return array
+     */
+    public function getOrderBy()
+    {
+        return $this->orderBy;
+    }
+
+
     public function orderBy($name, $direction = Select::ASC)
     {
         if (!$this->reflection->hasProperty($name)) {

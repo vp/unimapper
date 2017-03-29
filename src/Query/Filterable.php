@@ -12,6 +12,10 @@ trait Filterable
     /** @var array */
     protected $filter = [];
 
+    public function getFilter() {
+        return $this->filter;
+    }
+
     public function setFilter(array $filter = [])
     {
         try {

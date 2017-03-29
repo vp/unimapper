@@ -7,7 +7,7 @@ use UniMapper\Convention;
 use UniMapper\Cache\ICache;
 use UniMapper\Association;
 
-class Select extends \UniMapper\Query
+class Select extends \UniMapper\Query implements ICachableQuery
 {
 
     use Filterable;
@@ -46,12 +46,9 @@ class Select extends \UniMapper\Query
 
         if ($cache) {
 
-            $cachedResult = $cache->load($this->_getQueryChecksum());
+            $cachedResult = $cache->load($this);
             if ($cachedResult) {
-                return $mapper->mapCollection(
-                    $this->reflection->getName(),
-                    $cachedResult
-                );
+                return $cachedResult;
             }
         }
 
@@ -133,6 +130,13 @@ class Select extends \UniMapper\Query
             }
         }
 
+        $collection = $mapper->mapCollection(
+            $this->reflection->getName(),
+            empty($result) ? [] : $result
+        );
+
+        $collection->setSelection($selection);
+
         if ($cache) {
 
             $cachedOptions = $this->cachedOptions;
@@ -145,18 +149,11 @@ class Select extends \UniMapper\Query
             }
 
             $cache->save(
-                $this->_getQueryChecksum(),
-                $result,
+                $this,
+                $collection,
                 $cachedOptions
             );
         }
-
-        $collection = $mapper->mapCollection(
-            $this->reflection->getName(),
-            empty($result) ? [] : $result
-        );
-
-        $collection->setSelection($selection);
 
         return $collection;
     }
@@ -222,5 +219,21 @@ class Select extends \UniMapper\Query
             )
         );
     }
+
+    public function getCacheKey()
+    {
+     return $this->_getQueryChecksum();
+    }
+
+    public function getEntityReflection()
+    {
+       return $this->reflection;
+    }
+
+    public function getCachedOptions()
+    {
+        return $this->cachedOptions;
+    }
+
 
 }

@@ -11,6 +11,22 @@ trait Limit
     /** @var int */
     protected $offset;
 
+    /**
+     * @return int
+     */
+    public function getLimit()
+    {
+        return $this->limit;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
     public function limit($limit)
     {
         $this->limit = (int) $limit;

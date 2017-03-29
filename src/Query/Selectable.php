@@ -30,6 +30,23 @@ trait Selectable
     /** @var array  */
     protected $assocFilters = [];
 
+    /**
+     * @return array
+     */
+    public function getAssociations()
+    {
+        return $this->assocDefinitions;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
+
     public function associate($args)
     {
         $this->assocDefinitions = [];
