@@ -52,6 +52,28 @@ abstract class Adapter implements Adapter\IAdapter
         $this->afterExecute[] = $callback;
     }
 
+    private function _generateSelection(Reflection $entityReflection) {
+        $selection = [];
+        foreach ($entityReflection->getProperties() as $property) {
+
+            // Exclude associations & computed properties
+            if (!$property->hasOption(Reflection\Property::OPTION_ASSOC)
+                && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
+            ) {
+                if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
+                    $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                    $selection[] = [$property->getName(), $this->_generateSelection($targetReflection)];
+                } else {
+                    $selection[] = $property->getName();
+                }
+
+            }
+        }
+        return $selection;
+    }
+
+
+
     /**
      * Create selection for query
      *
@@ -62,36 +84,26 @@ abstract class Adapter implements Adapter\IAdapter
     public function createSelection(Query $query)
     {
         $entityReflection = $query->getEntityReflection();
-        $selection = [];
 
         if (!$query->getSelection()) {
-            foreach ($entityReflection->getProperties() as $property) {
-
-                // Exclude associations & computed properties
-                if (!$property->hasOption(Reflection\Property::OPTION_ASSOC)
-                    && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
-                ) {
-                    $selection[$property->getName()] = $property->getName(true);
-                }
-            }
+            $querySelection = $this->_generateSelection($entityReflection);
         } else {
-            // Unmap all names
-            foreach ($query->getSelection() as $name) {
-                $property = $entityReflection->getProperty($name);
-                $selection[$property->getName()] = $property->getName(true);
-            }
+            $querySelection = $query->getSelection();
+        }
 
-            // Include primary automatically if not provided
-            if ($entityReflection->hasPrimary()) {
+        // Unmap all names
+        $selection = $this->_unmapSelection($entityReflection, $querySelection);
 
-                $primaryName = $entityReflection
-                    ->getPrimaryProperty()
-                    ->getName();
+        // Include primary automatically if not provided
+        if ($entityReflection->hasPrimary()) {
 
-                if (!isset($selection[$primaryName])) {
-                    $selection[$primaryName] = $entityReflection
-                        ->getPrimaryProperty()->getName(true);
-                }
+            $primaryName = $entityReflection
+                ->getPrimaryProperty()
+                ->getName();
+
+            if (!isset($selection[$primaryName])) {
+                $selection[$primaryName] = $entityReflection
+                    ->getPrimaryProperty()->getName(true);
             }
         }
 
@@ -106,6 +118,26 @@ abstract class Adapter implements Adapter\IAdapter
         }
 
         return $selection;
+    }
+
+    private function _unmapSelection($entityReflection, $selection)
+    {
+        $unmapSelection = [];
+        foreach ($selection as $name) {
+            if (is_array($name)) {
+                $property = $entityReflection->getProperty($name[0]);
+                $targetReflection =  \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                if (isset($unmapSelection[$property->getName()])) {
+                    $unmapSelection[$property->getName()] = array_merge($unmapSelection[$property->getName()], $this->_unmapSelection($targetReflection, $name[1]));
+                } else {
+                    $unmapSelection[$property->getName()] = $this->_unmapSelection($targetReflection, $name[1]);
+                }
+            } else {
+                $property = $entityReflection->getProperty($name);
+                $unmapSelection[$property->getName()] = $property->getName(true);
+            }
+        }
+        return $unmapSelection;
     }
 
 }

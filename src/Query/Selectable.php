@@ -116,31 +116,55 @@ trait Selectable
                 $arg = [$arg];
             }
 
-            foreach ($arg as $name) {
-
-                if (!$this->entityReflection->hasProperty($name)) {
-                    throw new Exception\QueryException(
-                        "Property '" . $name . "' is not defined on entity "
-                        . $this->entityReflection->getClassName() . "!"
-                    );
-                }
-
-                $property = $this->entityReflection->getProperty($name);
-                if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
-                    || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
-                ) {
-                    throw new Exception\QueryException(
-                        "Associations and computed properties can not be selected!"
-                    );
-                }
-
-                if (!array_search($name, $this->selection)) {
-                    $this->selection[] = $name;
-                }
-            }
+            $this->selection = $this->_parseSelection($this->getEntityReflection(), $arg);
         }
 
         return $this;
+    }
+
+    private function _parseSelection(\UniMapper\Entity\Reflection $entityReflection, $selection) {
+        $returnSelection = [];
+        $map = [];
+        foreach ($selection as $index => $name) {
+
+            if (is_array($name)) {
+                $partialSelection = $name;
+                $name = $index;
+            } else {
+                $partialSelection = null;
+            }
+
+            if (!$entityReflection->hasProperty($name)) {
+                throw new Exception\QueryException(
+                    "Property '" . $name . "' is not defined on entity "
+                    . $entityReflection->getClassName() . "!"
+                );
+            }
+
+            $property = $entityReflection->getProperty($name);
+            if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
+                || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
+            ) {
+                throw new Exception\QueryException(
+                    "Associations and computed properties can not be selected!"
+                );
+            }
+
+            if ($partialSelection) {
+                $targetReflection =  \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                if (isset($map[$name])) {
+                    $returnSelection[$map[$name]][1]
+                        = array_merge( $returnSelection[$map[$name]][1], $this->_parseSelection($targetReflection, $partialSelection));
+                } else {
+                    $returnSelection[] = [$name, $this->_parseSelection($targetReflection, $partialSelection)];
+                }
+                $map[$name] = count($returnSelection)-1;
+            } else if (!array_search($name, $this->selection)) {
+                $returnSelection[] = $name;
+            }
+        }
+
+        return $returnSelection;
     }
 
 }
