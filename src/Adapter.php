@@ -59,6 +59,7 @@ abstract class Adapter implements Adapter\IAdapter
             // Exclude associations & computed properties
             if (!$property->hasOption(Reflection\Property::OPTION_ASSOC)
                 && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
+                && !$property->hasOption('map-exclude')
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
@@ -83,6 +84,7 @@ abstract class Adapter implements Adapter\IAdapter
      */
     public function createSelection(Query $query)
     {
+
         $entityReflection = $query->getEntityReflection();
 
         if (!$query->getSelection()) {
@@ -90,7 +92,8 @@ abstract class Adapter implements Adapter\IAdapter
         } else {
             $querySelection = $query->getSelection();
         }
-
+//        $test = $this->_generateSelection($entityReflection);
+//$testSelection =  $this->_unmapSelection($entityReflection, $test);
         // Unmap all names
         $selection = $this->_unmapSelection($entityReflection, $querySelection);
 
@@ -128,9 +131,9 @@ abstract class Adapter implements Adapter\IAdapter
                 $property = $entityReflection->getProperty($name[0]);
                 $targetReflection =  \UniMapper\Entity\Reflection::load($property->getTypeOption());
                 if (isset($unmapSelection[$property->getName()])) {
-                    $unmapSelection[$property->getName()] = array_merge($unmapSelection[$property->getName()], $this->_unmapSelection($targetReflection, $name[1]));
+                    $unmapSelection[$property->getName()][$property->getName(true)] = array_merge($unmapSelection[$property->getName()], $this->_unmapSelection($targetReflection, $name[1]));
                 } else {
-                    $unmapSelection[$property->getName()] = $this->_unmapSelection($targetReflection, $name[1]);
+                    $unmapSelection[$property->getName()] = [$property->getName(true) => $this->_unmapSelection($targetReflection, $name[1])];
                 }
             } else {
                 $property = $entityReflection->getProperty($name);
@@ -139,5 +142,4 @@ abstract class Adapter implements Adapter\IAdapter
         }
         return $unmapSelection;
     }
-
 }

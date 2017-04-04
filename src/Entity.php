@@ -456,8 +456,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
         $output = [];
         foreach (Entity\Reflection::load(get_called_class())->getProperties() as $propertyName => $property) {
 
-            // get only properties witch was really set
-            if (array_key_exists($propertyName, $this->data)) {
+
                 $value = $this->{$propertyName};
                 if ($value instanceof Entity\Collection || $value instanceof Entity) {
                     $output[$propertyName] = $value->jsonSerialize();
@@ -469,10 +468,10 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
                 } else {
                     $output[$propertyName] = $value;
                 }
-            }
+
         }
 
-        return array_merge($output, $this->_getPublicPropertyValues(false));
+        return array_merge($output, $this->_getPublicPropertyValues(true));
     }
 
     public function rewind()

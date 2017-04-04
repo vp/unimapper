@@ -145,9 +145,10 @@ trait Selectable
             if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
                 || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
             ) {
-                throw new Exception\QueryException(
-                    "Associations and computed properties can not be selected!"
-                );
+                continue;
+//                throw new Exception\QueryException(
+//                    "Associations and computed properties can not be selected!"
+//                );
             }
 
             if ($partialSelection) {
