@@ -122,11 +122,11 @@ trait Selectable
         return $this;
     }
 
-    protected function unmapSelection(\UniMapper\Connection $connection, $selection)
+    protected function unmapSelection(\UniMapper\Connection $connection, array $selection)
     {
         $mapper = $connection->getMapper();
 
-        $selection = $mapper->unmapSelection($this->getEntityReflection(), $selection);
+        $selection = $mapper->unmapSelection($this->getEntityReflection(), $selection, $this->associations['local']);
 
         // Add required keys from remote associations
         foreach ($this->associations['remote'] as $association) {

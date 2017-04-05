@@ -33,7 +33,9 @@ class Selection
         $selection = [];
         foreach ($entityReflection->getProperties() as $property) {
             // Exclude not mapped
-            if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)
+            if (!$property->hasOption(Reflection\Property::OPTION_COMPUTED)
+                && !$property->hasOption(Reflection\Property::OPTION_ASSOC)
+                && !$property->hasOption(Reflection\Property::OPTION_NOT_MAP)
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());

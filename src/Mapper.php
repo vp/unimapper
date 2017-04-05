@@ -360,7 +360,7 @@ class Mapper
      *
      * @return array
      */
-    public function unmapSelection(Reflection $reflection, array $selection){
+    public function unmapSelection(Reflection $reflection, array $selection, array $associations = []){
         $unmapSelection = [];
         foreach ($selection as $name) {
             if (is_array($name)) {
@@ -376,6 +376,12 @@ class Mapper
                 $unmapSelection[$property->getName()] = $property->getName(true);
             }
         }
+
+        if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
+            return $this->adapterMappings[$reflection->getAdapterName()]
+                ->unmapSelection($reflection, $selection, $associations);
+        }
+
         return $unmapSelection;
     }
 
