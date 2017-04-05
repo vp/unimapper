@@ -25,6 +25,7 @@ class Property
           OPTION_COMPUTED = "computed",
           OPTION_ENUM = "enum",
           OPTION_MAP = "map",
+          OPTION_NOT_MAP = "map-exclude",
           OPTION_MAP_BY = "map-by",
           OPTION_MAP_FILTER = "map-filter",
           OPTION_PRIMARY = "primary";

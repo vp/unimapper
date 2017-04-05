@@ -116,56 +116,46 @@ trait Selectable
                 $arg = [$arg];
             }
 
-            $this->selection = $this->_parseSelection($this->getEntityReflection(), $arg);
+            $this->selection = \UniMapper\Entity\Selection::normalizeEntitySelection($this->getEntityReflection(), $arg);
         }
 
         return $this;
     }
 
-    private function _parseSelection(\UniMapper\Entity\Reflection $entityReflection, $selection) {
-        $returnSelection = [];
-        $map = [];
-        foreach ($selection as $index => $name) {
+    protected function unmapSelection(\UniMapper\Connection $connection, $selection)
+    {
+        $mapper = $connection->getMapper();
 
-            if (is_array($name)) {
-                $partialSelection = $name;
-                $name = $index;
-            } else {
-                $partialSelection = null;
-            }
+        $selection = $mapper->unmapSelection($this->getEntityReflection(), $selection);
 
-            if (!$entityReflection->hasProperty($name)) {
-                throw new Exception\QueryException(
-                    "Property '" . $name . "' is not defined on entity "
-                    . $entityReflection->getClassName() . "!"
-                );
-            }
+        // Add required keys from remote associations
+        foreach ($this->associations['remote'] as $association) {
 
-            $property = $entityReflection->getProperty($name);
-            if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
-                || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
+            if (($association instanceof Association\ManyToOne || $association instanceof Association\OneToOne)
+                && !in_array($association->getReferencingKey(), $selection, true)
             ) {
-                continue;
-//                throw new Exception\QueryException(
-//                    "Associations and computed properties can not be selected!"
-//                );
-            }
-
-            if ($partialSelection) {
-                $targetReflection =  \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                if (isset($map[$name])) {
-                    $returnSelection[$map[$name]][1]
-                        = array_merge( $returnSelection[$map[$name]][1], $this->_parseSelection($targetReflection, $partialSelection));
-                } else {
-                    $returnSelection[] = [$name, $this->_parseSelection($targetReflection, $partialSelection)];
-                }
-                $map[$name] = count($returnSelection)-1;
-            } else if (!array_search($name, $this->selection)) {
-                $returnSelection[] = $name;
+                $selection[] = $association->getReferencingKey();
             }
         }
 
-        return $returnSelection;
+        return $selection;
     }
+
+    protected function prepareSelection(\UniMapper\Connection $connection)
+    {
+        if (empty($this->selection)) {
+            $selection = \UniMapper\Entity\Selection::generateEntitySelection($this->getEntityReflection());
+        } else {
+            $selection = $this->selection;
+        }
+        return $selection;
+    }
+
+    protected function createQuerySelection(\UniMapper\Connection $connection)
+    {
+        $selection = $this->prepareSelection($connection);
+        return $this->unmapSelection($connection, $selection);
+    }
+
 
 }

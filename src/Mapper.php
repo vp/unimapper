@@ -352,4 +352,31 @@ class Mapper
         return [];
     }
 
+    /**
+     * Unmap entity property selection
+     *
+     * @param \UniMapper\Entity\Reflection $reflection Entity reflection
+     * @param array                        $selection  Selection
+     *
+     * @return array
+     */
+    public function unmapSelection(Reflection $reflection, array $selection){
+        $unmapSelection = [];
+        foreach ($selection as $name) {
+            if (is_array($name)) {
+                $property = $reflection->getProperty($name[0]);
+                $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                if (isset($unmapSelection[$property->getName()])) {
+                    $unmapSelection[$property->getName()][$property->getName(true)] = array_merge($unmapSelection[$property->getName()], $this->unmapSelection($targetReflection, $name[1]));
+                } else {
+                    $unmapSelection[$property->getName()] = [$property->getName(true) => $this->unmapSelection($targetReflection, $name[1])];
+                }
+            } else {
+                $property = $reflection->getProperty($name);
+                $unmapSelection[$property->getName()] = $property->getName(true);
+            }
+        }
+        return $unmapSelection;
+    }
+
 }
