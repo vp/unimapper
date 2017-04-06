@@ -39,7 +39,7 @@ class Selection
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                    $selection[] = [$property->getName(), self::generateEntitySelection($targetReflection)];
+                    $selection[$property->getName()] = self::generateEntitySelection($targetReflection);
                 } else {
                     $selection[] = $property->getName();
                 }

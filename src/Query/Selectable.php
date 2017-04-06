@@ -116,7 +116,7 @@ trait Selectable
                 $arg = [$arg];
             }
 
-            $this->selection = \UniMapper\Entity\Selection::normalizeEntitySelection($this->getEntityReflection(), $arg);
+            $this->selection = $arg;
         }
 
         return $this;
@@ -148,6 +148,21 @@ trait Selectable
         } else {
             $selection = $this->selection;
         }
+
+        foreach ($this->associations['local'] as $association) {
+            if (!isset($selection[$association->getPropertyName()])) {
+                $targetSelection = $association->getTargetSelection();
+                $targetReflection = $association->getTargetReflection();
+
+                if (!$targetSelection) {
+                    $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
+                }
+                $selection[$association->getPropertyName()] = $targetSelection;
+            }
+        }
+
+        $selection = \UniMapper\Entity\Selection::normalizeEntitySelection($this->getEntityReflection(), $selection);
+        
         return $selection;
     }
 

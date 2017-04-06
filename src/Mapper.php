@@ -361,28 +361,33 @@ class Mapper
      * @return array
      */
     public function unmapSelection(Reflection $reflection, array $selection, array $associations = []){
-        $unmapSelection = [];
+        $selection = $this->traverseSelectionForUnmap($reflection, $selection);
+
+        if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
+            $selection = $this->adapterMappings[$reflection->getAdapterName()]
+                ->unmapSelection($reflection, $selection, $associations, $this);
+        }
+
+        return $selection;
+    }
+
+    protected function traverseSelectionForUnmap(Reflection $reflection, array $selection){
+        $unampped = [];
         foreach ($selection as $name) {
             if (is_array($name)) {
                 $property = $reflection->getProperty($name[0]);
                 $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                if (isset($unmapSelection[$property->getName()])) {
-                    $unmapSelection[$property->getName()][$property->getName(true)] = array_merge($unmapSelection[$property->getName()], $this->unmapSelection($targetReflection, $name[1]));
+                if (isset($unampped[$property->getName()])) {
+                    $unampped[$property->getName()][$property->getName(true)] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
                 } else {
-                    $unmapSelection[$property->getName()] = [$property->getName(true) => $this->unmapSelection($targetReflection, $name[1])];
+                    $unampped[$property->getName()] = [$property->getName(true) => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
                 }
             } else {
                 $property = $reflection->getProperty($name);
-                $unmapSelection[$property->getName()] = $property->getName(true);
+                $unampped[$property->getName()] = $property->getName(true);
             }
         }
 
-        if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
-            return $this->adapterMappings[$reflection->getAdapterName()]
-                ->unmapSelection($reflection, $selection, $associations);
-        }
-
-        return $unmapSelection;
+        return $unampped;
     }
-
 }
