@@ -103,8 +103,8 @@ abstract class Association
     {
         // optional checkout through annotation parameter
         $sourceProperty = $this->sourceReflection->getProperty($this->getPropertyName());
-        if ($sourceProperty->hasOption('assoc-remote')) {
-            $assocRemote = $sourceProperty->getOption('assoc-remote');
+        if ($sourceProperty->hasOption(\UniMapper\Entity\Reflection\Property::OPTION_ASSOC_REMOTE)) {
+            $assocRemote = $sourceProperty->getOption(\UniMapper\Entity\Reflection\Property::OPTION_ASSOC_REMOTE);
             return $assocRemote === 'true' || is_int($assocRemote) ? (bool) $assocRemote : false;
         }
         // default behaviour

@@ -24,6 +24,24 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
         Entity::CHANGE_REMOVE => []
     ];
 
+    private $selection = [];
+
+    /**
+     * @param array $selection
+     */
+    public function setSelection($selection)
+    {
+        $this->selection = $selection;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
     /**
      * @param string|Entity $name   Entity name, class or entity object
      * @param mixed         $values
@@ -244,6 +262,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function jsonSerialize()
     {
         return array_map(function (Entity $entity) {
+            $entity->setSelection($this->getSelection());
             return $entity->jsonSerialize();
         }, $this->data);
     }

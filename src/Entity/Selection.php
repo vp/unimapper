@@ -105,4 +105,42 @@ class Selection
 
         return $returnSelection;
     }
+
+    public static function filterValues(Reflection $reflection, array $values, array $selection = []) {
+
+        if (!$selection) {
+            return $values;
+        }
+
+        if (!$values) {
+            return $values;
+        }
+
+        $result = [];
+        foreach ($values as $k => $v) {
+            $index = array_search($k, $selection);
+            if ($index === false && isset($selection[$k])) {
+                $index = $k;
+            }
+            if ($index !== false) {
+                if (is_array($selection[$index])) {
+                    $property = $reflection->getProperty($k);
+                    if ($property->getType() === \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION) {
+                        $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                        foreach ($v as $row) {
+                            $result[] = self::filterValues($propertyTypeReflection, $row, $selection);
+                        }
+                    } else if ($property->getType() ===  \UniMapper\Entity\Reflection\Property::TYPE_ENTITY) {
+                        $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                        $result[$k] = self::filterValues($propertyTypeReflection, $v, $selection[$index]);
+                    } else {
+                        $result[$k] = $v;
+                    }
+                } else {
+                    $result[$k] = $v;
+                }
+            }
+        }
+        return $result;
+    }
 }

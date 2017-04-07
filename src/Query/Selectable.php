@@ -103,38 +103,14 @@ trait Selectable
     }
 
     /**
-     * Unmap given selection
+     * Return's final query selection
      *
-     * @param \UniMapper\Connection $connection
-     * @param array                 $selection
-     *
-     * @return array
-     */
-    protected function unmapSelection(\UniMapper\Connection $connection, array $selection)
-    {
-        $mapper = $connection->getMapper();
-
-        $selection = $mapper->unmapSelection($this->getEntityReflection(), $selection, $this->associations['local']);
-
-        // Add required keys from remote associations
-        foreach ($this->associations['remote'] as $association) {
-
-            if (($association instanceof Association\ManyToOne || $association instanceof Association\OneToOne)
-                && !in_array($association->getReferencingKey(), $selection, true)
-            ) {
-                $selection[] = $association->getReferencingKey();
-            }
-        }
-
-        return $selection;
-    }
-
-    /**
-     * Prepare selection for query
+     * Generates full selection for all entity properties if no selection provided
+     * Generates selection for associations if no provided
      *
      * @return array
      */
-    protected function prepareSelection()
+    public function getQuerySelection()
     {
         if (empty($this->selection)) {
             // select entity properties
@@ -162,14 +138,38 @@ trait Selectable
             }
         }
 
-        // normalize result selection for query
-        return \UniMapper\Entity\Selection::normalizeEntitySelection($this->getEntityReflection(), $selection);
+        return $selection;
     }
 
-    protected function createQuerySelection(\UniMapper\Connection $connection)
+    /**
+     * Create's unmapped selection for adapter
+     *
+     * @param \UniMapper\Connection $connection Connection
+     *
+     * @return array
+     */
+    protected function createAdapterSelection(\UniMapper\Connection $connection)
     {
-        $selection = $this->prepareSelection();
-        return $this->unmapSelection($connection, $selection);
+        //- get final query selection
+        $selection = $this->getQuerySelection();
+
+        //- normalize it before unmap
+        $selection =  \UniMapper\Entity\Selection::normalizeEntitySelection($this->getEntityReflection(), $selection);
+
+        //- unmap selection for adapter
+        $selection = $connection->getMapper()->unmapSelection($this->getEntityReflection(), $selection, $this->associations['local']);
+
+        // Add required keys from remote associations
+        foreach ($this->associations['remote'] as $association) {
+
+            if (($association instanceof Association\ManyToOne || $association instanceof Association\OneToOne)
+                && !in_array($association->getReferencingKey(), $selection, true)
+            ) {
+                $selection[] = $association->getReferencingKey();
+            }
+        }
+
+        return $selection;
     }
 
 

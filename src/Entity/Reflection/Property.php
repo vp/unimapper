@@ -22,6 +22,7 @@ class Property
 
     const OPTION_ASSOC = "assoc",
           OPTION_ASSOC_BY = "assoc-by",
+          OPTION_ASSOC_REMOTE = "assoc-remote",
           OPTION_COMPUTED = "computed",
           OPTION_ENUM = "enum",
           OPTION_MAP = "map",

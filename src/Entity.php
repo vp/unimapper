@@ -29,6 +29,24 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     /** @var integer $change */
     private $changeType;
 
+    private $selection = [];
+
+    /**
+     * @param array $selection
+     */
+    public function setSelection($selection)
+    {
+        $this->selection = $selection;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
     /**
      * @param mixed $values
      */
@@ -196,7 +214,11 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     public function serialize()
     {
         return serialize(
-            array_merge($this->data, $this->_getPublicPropertyValues())
+            \UniMapper\Entity\Selection::filterValues(
+                Entity\Reflection::load(get_called_class()),
+                array_merge($this->data, $this->_getPublicPropertyValues()),
+                $this->getSelection()
+            )
         );
     }
 
@@ -420,7 +442,8 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     public function toArray($nesting = false)
     {
         $output = [];
-        foreach (Entity\Reflection::load(get_called_class())->getProperties() as $propertyName => $property) {
+        $reflection = Entity\Reflection::load(get_called_class());
+        foreach ($reflection->getProperties() as $propertyName => $property) {
 
             $value = $this->{$propertyName};
             if (($value instanceof Entity\Collection || $value instanceof Entity)
@@ -432,14 +455,18 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
             }
         }
 
-        return array_merge($output, $this->_getPublicPropertyValues(true));
+        return \UniMapper\Entity\Selection::filterValues(
+            $reflection,
+                array_merge($output, $this->_getPublicPropertyValues()),
+                $this->getSelection()
+        );
     }
 
-    private function _getPublicPropertyValues($includeNotSet = true)
+    private function _getPublicPropertyValues()
     {
         $result = [];
         foreach (Entity\Reflection::load(get_called_class())->getPublicProperties() as $name) {
-            if ($includeNotSet || isset($this->{$name})) {
+            if (isset($this->{$name})) {
                 $result[$name] = $this->{$name};
             }
         }
@@ -454,7 +481,8 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     public function jsonSerialize()
     {
         $output = [];
-        foreach (Entity\Reflection::load(get_called_class())->getProperties() as $propertyName => $property) {
+        $reflection = Entity\Reflection::load(get_called_class());
+        foreach ($reflection->getProperties() as $propertyName => $property) {
 
 
                 $value = $this->{$propertyName};
@@ -471,7 +499,11 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
 
         }
 
-        return array_merge($output, $this->_getPublicPropertyValues(true));
+        return \UniMapper\Entity\Selection::filterValues(
+            $reflection,
+            array_merge($output, $this->_getPublicPropertyValues()),
+            $this->getSelection()
+        );
     }
 
     public function rewind()
