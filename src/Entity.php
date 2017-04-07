@@ -484,7 +484,6 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
         $reflection = Entity\Reflection::load(get_called_class());
         foreach ($reflection->getProperties() as $propertyName => $property) {
 
-
                 $value = $this->{$propertyName};
                 if ($value instanceof Entity\Collection || $value instanceof Entity) {
                     $output[$propertyName] = $value->jsonSerialize();

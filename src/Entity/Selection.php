@@ -47,6 +47,38 @@ class Selection
         }
         return $selection;
     }
+    
+    public static function checkEntitySelection(Reflection $reflection, array $selection)
+    {
+        $returnSelection = [];
+        foreach ($selection as $index => $value) {
+            if (is_scalar($value)) {
+                $property = $reflection->getProperty($value);
+                if ($property->getType() === Reflection\Property::TYPE_ENTITY
+                    || $property->getType() === Reflection\Property::TYPE_COLLECTION
+                ) {
+                    $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                    $returnSelection[$value] = self::generateEntitySelection($targetReflection);
+                } else {
+                    $returnSelection[$index] = $value;
+                }
+            } else if (is_array($value)) {
+                $property = $reflection->getProperty($index);
+                if ($property->getType() === Reflection\Property::TYPE_ENTITY
+                    || $property->getType() === Reflection\Property::TYPE_COLLECTION
+                ) {
+                    $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                    $returnSelection[$index] = self::checkEntitySelection($targetReflection, $value);
+                } else {
+                    $returnSelection[$index] = $value;
+                }
+            } else {
+                $returnSelection[$index] = $value;
+            }
+        }
+
+        return $returnSelection;
+    }
 
 
     /**
@@ -108,6 +140,7 @@ class Selection
 
     public static function filterValues(Reflection $reflection, array $values, array $selection = []) {
 
+
         if (!$selection) {
             return $values;
         }
@@ -127,12 +160,18 @@ class Selection
                     $property = $reflection->getProperty($k);
                     if ($property->getType() === \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION) {
                         $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                        foreach ($v as $row) {
-                            $result[] = self::filterValues($propertyTypeReflection, $row, $selection);
+                        if ($v) {
+                            foreach ($v as $row) {
+                                $result[$k][] = is_array($row) 
+                                    ? self::filterValues($propertyTypeReflection, $row, $selection[$index])
+                                    : $row;
+                            }
+                        } else {
+                            $result[$k] = $v;
                         }
                     } else if ($property->getType() ===  \UniMapper\Entity\Reflection\Property::TYPE_ENTITY) {
                         $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                        $result[$k] = self::filterValues($propertyTypeReflection, $v, $selection[$index]);
+                        $result[$k] = $v && !$v instanceof \UniMapper\Entity ? self::filterValues($propertyTypeReflection, $v, $selection[$index]) : $v;
                     } else {
                         $result[$k] = $v;
                     }

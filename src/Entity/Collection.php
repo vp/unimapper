@@ -32,6 +32,9 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function setSelection($selection)
     {
         $this->selection = $selection;
+        foreach ($this->data as $entity) {
+            $entity->setSelection($selection);
+        }
     }
 
     /**
@@ -195,7 +198,6 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function offsetSet($offset, $value)
     {
         $this->_validateEntity($value);
-
         if (is_null($offset)) {
             $this->data[] = $value;
         } else {
@@ -250,6 +252,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function toArray($nesting = false)
     {
         return array_map(function (Entity $entity) use ($nesting) {
+            $entity->setSelection($this->getSelection());
             return $entity->toArray($nesting);
         }, $this->data);
     }

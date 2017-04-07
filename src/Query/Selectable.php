@@ -23,8 +23,12 @@ trait Selectable
     /** @var array */
     protected $selection = [];
 
+    /** @var  array */
+    protected $querySelection;
+
     public function associate($args)
     {
+        $this->querySelection = null;
         foreach (func_get_args() as $arg) {
 
             if (!is_array($arg)) {
@@ -90,6 +94,8 @@ trait Selectable
 
     public function select($args)
     {
+        $this->querySelection = null;
+
         foreach (func_get_args() as $arg) {
 
             if (!is_array($arg)) {
@@ -112,33 +118,36 @@ trait Selectable
      */
     public function getQuerySelection()
     {
-        if (empty($this->selection)) {
-            // select entity properties
-            $selection = \UniMapper\Entity\Selection::generateEntitySelection($this->getEntityReflection());
-        } else {
-            // use provided
-            $selection = $this->selection;
-        }
-
-        // select associations properties
-        /** @var \UniMapper\Association $association */
-        foreach (array_merge($this->associations['local'], $this->associations['remote']) as $association) {
-            // if no selection for associated property provided
-            if (!isset($selection[$association->getPropertyName()]) || !$association->getTargetSelection()) {
-                $targetSelection = $association->getTargetSelection();
-                $targetReflection = $association->getTargetReflection();
-
-                if (!$targetSelection) {
-                    // no target selection provided get full
-                    $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
-                }
-
-                // set it
-                $selection[$association->getPropertyName()] = $targetSelection;
+        if (!$this->querySelection) {
+            if (empty($this->selection)) {
+                // select entity properties
+                $selection = \UniMapper\Entity\Selection::generateEntitySelection($this->getEntityReflection());
+            } else {
+                // use provided
+                $selection = \UniMapper\Entity\Selection::checkEntitySelection($this->getEntityReflection(), $this->selection);
             }
+
+            // select associations properties
+            /** @var \UniMapper\Association $association */
+            foreach (array_merge($this->associations['local'], $this->associations['remote']) as $association) {
+                // if no selection for associated property provided
+                if (!isset($selection[$association->getPropertyName()]) || !$association->getTargetSelection()) {
+                    $targetSelection = $association->getTargetSelection();
+                    $targetReflection = $association->getTargetReflection();
+
+                    if (!$targetSelection) {
+                        // no target selection provided get full
+                        $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
+                    }
+
+                    // set it
+                    $selection[$association->getPropertyName()] = $targetSelection;
+                }
+            }
+            $this->querySelection = $selection;
         }
 
-        return $selection;
+        return $this->querySelection;
     }
 
     /**

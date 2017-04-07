@@ -82,7 +82,11 @@ class SelectOne extends \UniMapper\Query
             }
         }
 
-        return $connection->getMapper()->mapEntity($this->entityReflection->getName(), $result);
+        $entity = $connection->getMapper()->mapEntity($this->entityReflection->getName(), $result);
+
+        $entity->setSelection($this->getQuerySelection());
+
+        return $entity;
     }
 
 }

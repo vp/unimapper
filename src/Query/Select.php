@@ -130,10 +130,14 @@ class Select extends \UniMapper\Query
             );
         }
 
-        return $mapper->mapCollection(
+        $collection = $mapper->mapCollection(
             $this->entityReflection->getName(),
             empty($result) ? [] : $result
         );
+
+        $collection->setSelection($this->getQuerySelection());
+
+        return $collection;
     }
 
     /**
