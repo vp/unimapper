@@ -75,6 +75,55 @@ class Assoc implements IOption
         return $this->definition;
     }
 
+    public function getBy()
+    {
+        return $this->getParameter('by');
+    }
+
+    /**
+     * Set's concrete definition
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    protected function setParameter($name, $value)
+    {
+        $this->definition[$name] = $value;
+    }
+
+    public function hasParameter($name) {
+        return isset($this->definition[$name]);
+    }
+
+    public function getParameter($name) {
+        if (!$this->hasParameter($name)) {
+            throw new OptionException(
+                "Not existing option parameter '{$name}'!"
+            );
+        }
+        return $this->definition[$name];
+    }
+
+    public function getTargetSelection()
+    {
+        return isset($this->definition['selection']) ? $this->definition['selection'] : [];
+    }
+
+    public function setTargetSelection(array $targetSelection)
+    {
+        $this->setParameter('selection', $targetSelection);
+    }
+
+    public function getTargetFilter()
+    {
+        return isset($this->definition['filter']) ? $this->definition['filter'] : [];
+    }
+
+    public function setTargetFilter(array $filter)
+    {
+        $this->setParameter('filter', $filter);
+    }
+
     /**
      * @return Reflection
      */
@@ -117,11 +166,17 @@ class Assoc implements IOption
             throw new OptionException("Association definition required!");
         }
 
-        if (isset($parameters[self::KEY . "-by"])) {
-            $definition = explode("|", $parameters[self::KEY . "-by"]);
+        $definition = array_combine(array_map(function ($key) {
+            return substr($key, strlen(Assoc::KEY) + 1);
+        }, array_keys($parameters)), array_values($parameters));
+
+        if (isset($definition["by"])) {
+            $definition["by"] = explode("|", $definition["by"]);
         } else {
-            $definition = [];
+            $definition["by"] = [];
         }
+
+        $definition['type'] = $value;
 
         return new self(
             $value,

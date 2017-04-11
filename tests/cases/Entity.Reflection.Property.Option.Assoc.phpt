@@ -22,7 +22,21 @@ class EntityReflectionPropertyOptionAssocTest extends TestCase
         $assoc = Assoc::create($this->createProperty(), "value", ["assoc-by" => "arg1|arg2"]);
         Assert::type("UniMapper\Entity\Reflection\Property\Option\Assoc", $assoc);
         Assert::same("value", $assoc->getType());
-        Assert::same(["arg1", "arg2"], $assoc->getDefinition());
+        Assert::same(["by" => ["arg1", "arg2"], "type" => "value"], $assoc->getDefinition());
+    }
+
+    public function testCreateWithOptions()
+    {
+        $assoc = Assoc::create($this->createProperty(), "M:N", ["assoc-by" => "arg1|arg2", "assoc-remote" => "false", "assoc-selection" => "a,b,c", "assoc-filter" => '{"a": ["=": true}}']);
+        Assert::type("UniMapper\Entity\Reflection\Property\Option\Assoc", $assoc);
+
+        Assert::same([
+            'by' => ['arg1', 'arg2'],
+            'remote' => 'false',
+            'selection' => 'a,b,c',
+            'filter' => '{"a": ["=": true}}',
+            'type' => 'M:N',
+        ], $assoc->getDefinition());
     }
 
     /**

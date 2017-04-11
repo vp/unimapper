@@ -7,12 +7,16 @@ use UniMapper\Exception;
 use UniMapper\Entity\Reflection;
 use UniMapper\Entity\Reflection\Property\Option\Assoc;
 
+/**
+ * Selectable trait
+ *
+ * @property Reflection $reflection
+ */
 trait Selectable
 {
 
     public static $KEY_SELECTION = 'selection';
     public static $KEY_FILTER = 'filter';
-    public static $KEY_SELECTION_FULL = 'full';
 
     /** @var array */
     protected $adapterAssociations = [];
@@ -23,8 +27,13 @@ trait Selectable
     /** @var array */
     protected $selection = [];
 
+    /** @var  Assoc[] */
+    protected $assocDefinitions = [];
+
     public function associate($args)
     {
+        $this->assocDefinitions = [];
+
         foreach (func_get_args() as $arg) {
 
             if (!is_array($arg)) {
@@ -39,6 +48,9 @@ trait Selectable
                     $selection = isset($name[self::$KEY_SELECTION]) ? $name[self::$KEY_SELECTION] : [];
                     $filter = isset($name[self::$KEY_FILTER]) ? $name[self::$KEY_FILTER] : [];
                     $name = $key;
+                } else {
+                    $selection = [];
+                    $filter = [];
                 }
 
                 if (!$this->reflection->hasProperty($name)) {
@@ -60,34 +72,10 @@ trait Selectable
 
                 /** @var Assoc $option */
                 $option = $property->getOption(Assoc::KEY);
+                $option->setTargetFilter($filter);
+                $option->setTargetSelection($selection);
 
-                if ($option->isRemote()) {
-                    $association = $this->adapterAssociations[$name] = $option;
-                } else {
-                    $association = $this->remoteAssociations[$name] = Association::create(
-                        $option
-                    );
-                }
-
-                if ($selection) {
-                    if (is_string($selection)) {
-                        if (is_string($selection)) {
-                            switch ($selection) {
-                                case self::$KEY_SELECTION_FULL:
-                                    $selection = [];
-                                    foreach ($option->getTargetReflection()->getProperties() as $property) {
-                                        $selection[] = $property->getName(true);
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                    $association->setTargetSelection($selection);
-                }
-
-                if ($filter) {
-                    $association->setTargetFilter($filter);
-                }
+                $this->assocDefinitions[$name] = $option;
             }
         }
 
@@ -96,39 +84,109 @@ trait Selectable
 
     public function select($args)
     {
-        foreach (func_get_args() as $arg) {
-
-            if (!is_array($arg)) {
-                $arg = [$arg];
+        if (func_num_args() > 1) {
+            $this->selection = func_get_args();
+        } else if ($args) {
+            if (!is_array($args)) {
+                $args = [$args];
             }
+            $this->selection = $args;
+        } else {
+            $this->selection = [];
+        }
 
-            foreach ($arg as $name) {
+        \UniMapper\Entity\Selection::validateInputSelection($this->reflection, $this->selection);
 
-                if (!$this->reflection->hasProperty($name)) {
-                    throw new Exception\QueryException(
-                        "Property '" . $name . "' is not defined on entity "
-                        . $this->reflection->getClassName() . "!"
-                    );
-                }
+        return $this;
+    }
 
-                $property = $this->reflection->getProperty($name);
-                if ($property->hasOption(Reflection\Property\Option\Assoc::KEY)
-                    || $property->hasOption(Reflection\Property\Option\Computed::KEY)
-                    || ($property->hasOption(Reflection\Property\Option\Map::KEY)
-                        && !$property->getOption(Reflection\Property\Option\Map::KEY))
-                ) {
-                    throw new Exception\QueryException(
-                        "Associations, computed and properties with disabled mapping can not be selected!"
-                    );
-                }
 
-                if (!array_search($name, $this->selection)) {
-                    $this->selection[] = $name;
-                }
+    /**
+     * Return's query adapter associations
+     *
+     * @return array|\UniMapper\Entity\Reflection\Property\Option\Assoc[]
+     */
+    protected function getAdapterAssociations()
+    {
+        $associations = [];
+        foreach ($this->assocDefinitions as $propertyName => $definition) {
+            if (!$definition->isRemote()) {
+                $associations[$propertyName] = $definition;
+            }
+        }
+        return $associations;
+    }
+
+
+    /**
+     * Create's and return remote associations
+     *
+     * @return array|\UniMapper\Association[]
+     */
+    protected function createRemoteAssociations()
+    {
+        $associations = [];
+        foreach ($this->assocDefinitions as $propertyName => $definition) {
+            if ($definition->isRemote()) {
+                $associations[$propertyName] = Association::create(
+                    $definition
+                );
+            }
+        }
+        return $associations;
+    }
+
+    /**
+     * Return's final query selection
+     *
+     * Generates full selection for all entity properties if no selection provided
+     * Merge or generate selection for associations
+     *
+     * @return array
+     */
+    public function createQuerySelection()
+    {
+        if (empty($this->selection)) {
+            // select entity properties
+            $selection = \UniMapper\Entity\Selection::generateEntitySelection($this->reflection);
+        } else {
+            // use provided
+            $selection = \UniMapper\Entity\Selection::checkEntitySelection($this->reflection, $this->selection);
+        }
+
+        // Include primary automatically if not provided
+        if ($this->reflection->hasPrimary()) {
+
+            $primaryName = $this->reflection
+                ->getPrimaryProperty()
+                ->getName();
+
+            if (!in_array($primaryName, $selection, true)) {
+                $selection[] = $primaryName;
             }
         }
 
-        return $this;
+        foreach ($this->assocDefinitions as $propertyName => $definition) {
+            //- get from selection
+            $targetSelection = isset($selection[$propertyName]) ? $selection[$propertyName] : [];
+
+            //- look if is set on association annotation
+            if ($definition->getTargetSelection()) {
+                $targetSelection = array_unique(array_merge($targetSelection, $definition->getTargetSelection()));
+            }
+
+            // if no selection for associated property provided
+            if (!$targetSelection) {
+                //- then generate it
+                $targetReflection = $definition->getTargetReflection();
+                $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
+            }
+
+            // set it
+            $selection[$propertyName] = $targetSelection;
+        }
+
+        return $selection;
     }
 
 }

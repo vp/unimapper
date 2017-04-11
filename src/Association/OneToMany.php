@@ -21,9 +21,11 @@ class OneToMany extends Association
     public function __construct(
         Reflection $sourceReflection,
         Reflection $targetReflection,
-        $referencedKey = null
+        array $definition = []
     ) {
         parent::__construct($sourceReflection, $targetReflection);
+
+        $referencedKey = isset($definition['by']) ? $definition['by'] : null;
 
         if (!$referencedKey) {
 
@@ -35,7 +37,7 @@ class OneToMany extends Association
         $this->referencedKey = $referencedKey;
     }
 
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [], $filter = [])
     {
         $targetAdapter = $connection->getAdapter(
             $this->targetReflection->getAdapterName()
@@ -43,23 +45,23 @@ class OneToMany extends Association
 
         $query = $targetAdapter->createSelect(
             $this->targetReflection->getAdapterResource(),
-            $this->getTargetSelection()
+            $selection
         );
 
-        $filter = [
+        $targetFilter = [
             $this->referencedKey => [
                 Entity\Filter::EQUAL => array_values($primaryValues)
             ]
         ];
 
-        if ($this->getTargetFilter()) {
-            $filter = array_merge(
-                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
-                $filter
+        if ($filter) {
+            $targetFilter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $filter),
+                $targetFilter
             );
         }
 
-        $query->setFilter($filter);
+        $query->setFilter($targetFilter);
 
         $result = $targetAdapter->execute($query);
 

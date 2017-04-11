@@ -2,6 +2,7 @@
 
 namespace UniMapper\Query;
 
+use UniMapper\Entity\Selection;
 use UniMapper\Exception,
     UniMapper\Entity\Reflection;
 
@@ -41,20 +42,23 @@ class SelectOne extends \UniMapper\Query
     protected function onExecute(\UniMapper\Connection $connection)
     {
         $adapter = $connection->getAdapter($this->reflection->getAdapterName());
-
+        $mapper = $connection->getMapper();
         $primaryProperty = $this->reflection->getPrimaryProperty();
+        $selection = $this->createQuerySelection();
 
         $query = $adapter->createSelectOne(
             $this->reflection->getAdapterResource(),
             $primaryProperty->getUnmapped(),
-            $connection->getMapper()->unmapValue(
+            $mapper->unmapValue(
                 $primaryProperty,
                 $this->primaryValue
-            )
+            ),
+            Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions)
         );
 
-        if ($this->adapterAssociations) {
-            $query->setAssociations($this->adapterAssociations);
+        $adapterAssociations = $this->getAdapterAssociations();
+        if ($adapterAssociations) {
+            $query->setAssociations($adapterAssociations);
         }
 
         $result = $adapter->execute($query);
@@ -63,16 +67,35 @@ class SelectOne extends \UniMapper\Query
             return false;
         }
 
-        // Get remote associations
-        if ($this->remoteAssociations) {
+        // Create remote associations
+        $remoteAssociations = $this->createRemoteAssociations();
+        if ($remoteAssociations) {
 
             settype($result, "array");
 
-            foreach ($this->remoteAssociations as $colName => $association) {
+            foreach ($remoteAssociations as $colName => $association) {
 
                 $assocValue = $result[$association->getKey()];
 
-                $associated = $association->load($connection, [$assocValue]);
+                $definition = $this->assocDefinitions[$colName];
+
+                $associationSelection = Selection::createAdapterSelection(
+                    $mapper,
+                    $definition->getTargetReflection(),
+                    $selection[$colName]
+                );
+
+                $associationFilter = $mapper->unmapFilter(
+                    $definition->getTargetReflection(),
+                    $definition->getTargetFilter()
+                );
+
+                $associated = $association->load(
+                    $connection,
+                    [$assocValue],
+                    $associationSelection,
+                    $associationFilter
+                );
 
                 // Merge returned associations
                 if (isset($associated[$assocValue])) {
@@ -81,7 +104,11 @@ class SelectOne extends \UniMapper\Query
             }
         }
 
-        return $connection->getMapper()->mapEntity($this->reflection->getName(), $result);
+        $entity = $mapper->mapEntity($this->reflection->getName(), $result);
+
+        $entity->setSelection($selection);
+
+        return $entity;
     }
 
 }

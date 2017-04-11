@@ -28,6 +28,24 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
     /** @var integer $change */
     private $changeType;
 
+    private $selection = [];
+
+    /**
+     * @param array $selection
+     */
+    public function setSelection($selection)
+    {
+        $this->selection = $selection;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
     /**
      * @param mixed $values
      */
@@ -172,7 +190,13 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
      */
     public function serialize()
     {
-        return serialize($this->data);
+        return serialize(
+            \UniMapper\Entity\Selection::filterValues(
+                Entity\Reflection::load(get_called_class()),
+                $this->data,
+                $this->getSelection()
+            )
+        );
     }
 
     public function unserialize($data)
@@ -408,7 +432,11 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
             }
         }
 
-        return $output;
+        return \UniMapper\Entity\Selection::filterValues(
+            $this::getReflection(),
+            $output,
+            $this->getSelection()
+        );
     }
 
     /**
@@ -434,7 +462,11 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
             }
         }
 
-        return $output;
+        return \UniMapper\Entity\Selection::filterValues(
+            $this::getReflection(),
+            $output,
+            $this->getSelection()
+        );
     }
 
     public function seek($position)

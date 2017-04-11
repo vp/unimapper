@@ -153,11 +153,12 @@ class MapperTest extends TestCase
     {
         $fooMapping = Mockery::mock('\UniMapper\Adapter\Mapping');
         $fooMapping->shouldReceive('unmapFilterJoinProperty')->once()->andReturn('foo');
+        $fooMapping->shouldReceive('unmapValue')->once()->andReturn(1);
         $this->mapper->registerAdapterMapping('FooAdapter', $fooMapping);
         Assert::same(
             ["foo" => [\UniMapper\Entity\Filter::EQUAL => 1]],
             $this->mapper->unmapFilter(
-                Reflection::load("Simple"),
+                Reflection::load("Foo"),
                 ["oneToOne.id" => [\UniMapper\Entity\Filter::EQUAL => 1]]
             )
         );
@@ -202,6 +203,21 @@ class Entity extends \UniMapper\Entity
         return (string) $value;
     }
 }
+
+/**
+ * @adapter FooAdapter
+ *
+ * @property int    $id           m:primary
+ * @property Bar[]  $oneToOne  m:assoc(1:1)
+ */
+class Foo extends \UniMapper\Entity {}
+
+/**
+ * @adapter FooAdapter
+ *
+ * @property int $id m:primary
+ */
+class Bar extends \UniMapper\Entity {}
 
 $testCase = new MapperTest;
 $testCase->run();

@@ -21,12 +21,6 @@ class Association
     /** @var Reflection */
     protected $targetReflection;
 
-    /** @var  array */
-    protected $targetSelection = [];
-
-    /** @var array array */
-    protected $targetFilter = [];
-
     /**
      * @param Reflection $sourceReflection
      * @param Reflection $targetReflection
@@ -50,7 +44,7 @@ class Association
     /**
      * Key name that refers target results to source entity
      *
-     * @return type
+     * @return string
      */
     public function getKey()
     {
@@ -75,50 +69,29 @@ class Association
                 return new ManyToMany(
                     $option->getSourceReflection(),
                     $option->getTargetReflection(),
-                    $definition,
-                    $option->getType() === "m<n" ? false : true
+                    $definition
                 );
             case "1:1":
                 return new OneToOne(
                     $option->getSourceReflection(),
                     $option->getTargetReflection(),
-                    isset($definition[0]) ? $definition[0] : null
+                    $definition
                 );
             case "1:n":
                 return new OneToMany(
                     $option->getSourceReflection(),
                     $option->getTargetReflection(),
-                    isset($definition[0]) ? $definition[0] : null
+                    $definition
                 );
             case "n:1":
                 return new ManyToOne(
                     $option->getSourceReflection(),
                     $option->getTargetReflection(),
-                    isset($definition[0]) ? $definition[0] : null
+                    $definition
                 );
             default:
                 throw new AssociationException("Unsupported association type");
         }
-    }
-
-    public function getTargetSelection()
-    {
-        return $this->targetSelection;
-    }
-
-    public function setTargetSelection(array $targetSelection)
-    {
-        $this->targetSelection = $targetSelection;
-    }
-
-    public function getTargetFilter()
-    {
-        return $this->targetFilter;
-    }
-
-    public function setTargetFilter(array $filter)
-    {
-        $this->targetFilter = $filter;
     }
 
     /**
@@ -177,6 +150,20 @@ class Association
         }
 
         return $converted;
+    }
+
+    /**
+     * Load remote association
+     *
+     * @param Connection $connection
+     * @param array      $primaryValues
+     * @param array      $selection
+     *
+     * @return array
+     * @throws \UniMapper\Exception\AssociationException
+     */
+    public function load(Connection $connection, array $primaryValues, array $selection = [], $filter = []) {
+        throw new AssociationException('Load not implemented for association!');
     }
 
 }

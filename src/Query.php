@@ -5,7 +5,6 @@ namespace UniMapper;
 use UniMapper\Adapter\IQuery;
 use UniMapper\Adapter\IQueryWithJoins;
 use UniMapper\Exception\QueryException;
-use UniMapper\Query\Filterable;
 
 abstract class Query
 {
@@ -63,18 +62,18 @@ abstract class Query
         return $result;
     }
     
-    protected function setQueryFilters($filter, IQuery $query, Connection $connection)
+    protected function setQueryFilters($filter, IQuery $query, Mapper $mapper)
     {
         if ($filter) {
             $query->setFilter(
-                $connection->getMapper()->unmapFilter(
+                $mapper->unmapFilter(
                     $this->reflection,
                     $filter
                 )
             );
 
             if ($query instanceof IQueryWithJoins) {
-                $joins = $connection->getMapper()->unmapFilterJoins(
+                $joins = $mapper->unmapFilterJoins(
                     $this->reflection,
                     $filter
                 );
@@ -86,4 +85,5 @@ abstract class Query
         }
     }
 
+    abstract protected function onExecute(\UniMapper\Connection $connection);
 }

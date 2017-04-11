@@ -246,6 +246,9 @@ class Reflection
         return $this->properties[$name];
     }
 
+    /**
+     * @return array|Entity\Reflection\Property[]
+     */
     public function getProperties()
     {
         return $this->properties;

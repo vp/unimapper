@@ -8,7 +8,7 @@ use UniMapper\Entity\Reflection;
 class Mapper
 {
 
-    /** @var array */
+    /** @var array|\UniMapper\Adapter\Mapping */
     private $adapterMappings = [];
 
     public function registerAdapterMapping($name, Adapter\Mapping $mapping)
@@ -379,4 +379,43 @@ class Mapper
         return [];
     }
 
+    /**
+     * Unmap entity property selection
+     *
+     * @param \UniMapper\Entity\Reflection $reflection   Entity reflection
+     * @param array                        $selection    Selection
+     * @param array                        $associations Local associations
+     *
+     * @return array
+     */
+    public function unmapSelection(Reflection $reflection, array $selection, array $associations = []){
+        $selection = $this->traverseSelectionForUnmap($reflection, $selection);
+
+        if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
+            $selection = $this->adapterMappings[$reflection->getAdapterName()]
+                ->unmapSelection($reflection, $selection, $associations, $this);
+        }
+
+        return $selection;
+    }
+
+    protected function traverseSelectionForUnmap(Reflection $reflection, array $selection){
+        $unampped = [];
+        foreach ($selection as $name) {
+            if (is_array($name)) {
+                $property = $reflection->getProperty($name[0]);
+                $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                if (isset($unampped[$property->getName()])) {
+                    $unampped[$property->getName()][$property->getUnmapped()] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
+                } else {
+                    $unampped[$property->getName()] = [$property->getUnmapped() => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
+                }
+            } else {
+                $property = $reflection->getProperty($name);
+                $unampped[$property->getName()] = $property->getUnmapped();
+            }
+        }
+
+        return $unampped;
+    }
 }

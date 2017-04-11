@@ -223,7 +223,8 @@ class EntityTest extends TestCase
                 "collection" => [$object],
                 "readonly" => 1,
                 "undefined" => null,
-                "computed" => 1
+                "computed" => 1,
+                "publicProperty" => 'foo'
             ]
         );
         Assert::same(2, $this->entity->integer);
@@ -397,6 +398,8 @@ class EntityTest extends TestCase
  */
 class Entity extends \UniMapper\Entity
 {
+    public $publicProperty;
+
     const ENUMERATION_ONE = 1;
     const ENUMERATION_TWO = 2;
 

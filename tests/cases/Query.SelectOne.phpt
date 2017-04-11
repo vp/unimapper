@@ -43,7 +43,7 @@ class QuerySelectOneTest extends TestCase
             ->andReturn($this->fooAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1)
+            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -73,7 +73,7 @@ class QuerySelectOneTest extends TestCase
             ->once();
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1)
+            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -91,7 +91,7 @@ class QuerySelectOneTest extends TestCase
     public function testOnExecuteWithAssociation()
     {
         $this->connectionMock->shouldReceive("getMapper")
-            ->twice()
+            ->once()
             ->andReturn(new UniMapper\Mapper);
         $this->connectionMock->shouldReceive("getAdapter")
             ->twice()
@@ -103,7 +103,7 @@ class QuerySelectOneTest extends TestCase
             ->andReturn($this->barAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1)
+            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -129,7 +129,7 @@ class QuerySelectOneTest extends TestCase
             );
 
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("barResource")
+            ->with("barResource", ["id" => "barId"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapterQueryMock->shouldReceive("setFilter")

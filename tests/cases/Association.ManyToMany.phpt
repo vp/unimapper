@@ -248,7 +248,7 @@ class AssociationManyToManyTest extends TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("Bar")
+            ->with("Bar", [])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")
@@ -326,7 +326,7 @@ class AssociationManyToManyTest extends TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("Bar")
+            ->with("Bar", [])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")
@@ -368,7 +368,7 @@ class AssociationManyToManyTest extends TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("Bar")
+            ->with("Bar", [])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")
@@ -392,7 +392,8 @@ class AssociationManyToManyTest extends TestCase
 
     private function create($dominant = true)
     {
-        return new Association\ManyToMany(Foo::getReflection(), Bar::getReflection(), [], $dominant);
+        $definition = ['type' => ($dominant ? 'm:n' : "m<n")];
+        return new Association\ManyToMany(Foo::getReflection(), Bar::getReflection(), $definition);
     }
 
 }

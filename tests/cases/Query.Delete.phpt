@@ -70,6 +70,9 @@ class QueryDeleteTest extends TestCase
             ->with($this->adapterQueryMock)
             ->once()
             ->andReturn("2");
+        $this->connectionMock->shouldReceive("getMapper")
+            ->once()
+            ->andReturn(new UniMapper\Mapper);
 
         $query = new Query\Delete(Foo::getReflection());
         $query->run($this->connectionMock);

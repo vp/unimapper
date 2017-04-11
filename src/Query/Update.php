@@ -39,7 +39,7 @@ class Update extends \UniMapper\Query
             $values
         );
 
-        $this->setQueryFilters($this->filter, $query, $connection);
+        $this->setQueryFilters($this->filter, $query, $mapper);
 
         return (int) $adapter->execute($query);
     }

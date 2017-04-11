@@ -41,7 +41,7 @@ class AssociationOneToManyTest extends TestCase
             ->andReturn($this->barAdapterMock);
 
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("Bar")
+            ->with("Bar", [])
             ->once()
             ->andReturn($this->adapterQueryMock);
 

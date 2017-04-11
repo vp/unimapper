@@ -29,8 +29,7 @@ class ManyToMany extends Association
     public function __construct(
         Entity\Reflection $sourceReflection,
         Entity\Reflection $targetReflection,
-        array $arguments = [],
-        $dominant = true
+        array $definition = []
     ) {
         parent::__construct($sourceReflection, $targetReflection);
 
@@ -39,6 +38,8 @@ class ManyToMany extends Association
                 "Target entity must have defined primary when M:N relation used!"
             );
         }
+
+        $arguments = isset($definition['by']) ? $definition['by'] : [];
 
         // Auto-detection
         if (!isset($arguments[0])) {
@@ -66,7 +67,7 @@ class ManyToMany extends Association
         $this->joinKey = $arguments[0];
         $this->joinResource = $arguments[1];
         $this->referencingKey = $arguments[2];
-        $this->dominant = (bool) $dominant;
+        $this->dominant = $definition['type'] === "m<n" ? false : true;
     }
 
     /**
@@ -79,7 +80,7 @@ class ManyToMany extends Association
      *
      * @todo should be optimized with 1 query only on same adapters
      */
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [], $filter = [])
     {
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
 
@@ -113,23 +114,23 @@ class ManyToMany extends Association
 
         $targetQuery = $targetAdapter->createSelect(
             $this->targetReflection->getAdapterResource(),
-            $this->getTargetSelection()
+            $selection
         );
 
-        $filter =  [
+        $targetFilter =  [
             $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
                 Entity\Filter::EQUAL => array_keys($joinResult)
             ]
         ];
 
-        if ($this->getTargetFilter()) {
-            $filter = array_merge(
-                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
-                $filter
+        if ($filter) {
+            $targetFilter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $filter),
+                $targetFilter
             );
         }
 
-        $targetQuery->setFilter($filter);
+        $targetQuery->setFilter($targetFilter);
 
         $targetResult = $targetAdapter->execute($targetQuery);
         if (!$targetResult) {

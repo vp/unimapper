@@ -55,53 +55,80 @@ class Select extends \UniMapper\Query
             }
         }
 
+        $selection = $this->createQuerySelection();
+        $remoteAssociations = $this->createRemoteAssociations();
+
         $query = $adapter->createSelect(
             $this->reflection->getAdapterResource(),
-            $this->createSelection(),
+            \UniMapper\Entity\Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions),
             $this->orderBy,
             $this->limit,
             $this->offset
         );
 
-        $this->setQueryFilters($this->filter, $query, $connection);
+        $this->setQueryFilters($this->filter, $query, $mapper);
 
-        if ($this->adapterAssociations) {
-            $query->setAssociations($this->adapterAssociations);
+        // Set's query adapter local associations
+        $adapterAssociations = $this->getAdapterAssociations();
+        if ($adapterAssociations) {
+            $query->setAssociations($adapterAssociations);
         }
 
         // Execute adapter query
         $result = $adapter->execute($query);
 
-        // Get remote associations
-        if ($this->remoteAssociations && !empty($result)) {
+        if (!empty($result)) {
 
-            settype($result, "array");
 
-            foreach ($this->remoteAssociations as $colName => $association) {
+            // Get remote associations
+            if ($remoteAssociations) {
 
-                $assocKey = $association->getKey();
+                settype($result, "array");
 
-                $assocValues = [];
-                foreach ($result as $item) {
+                /** @var \UniMapper\Association $association */
+                foreach ($remoteAssociations as $colName => $association) {
 
-                    if (is_array($item)) {
-                        $assocValues[] = $item[$assocKey];
-                    } else {
-                        $assocValues[] = $item->{$assocKey};
+                    $assocKey = $association->getKey();
+
+                    $assocValues = [];
+                    foreach ($result as $item) {
+
+                        if (is_array($item)) {
+                            $assocValues[] = $item[$assocKey];
+                        } else {
+                            $assocValues[] = $item->{$assocKey};
+                        }
                     }
-                }
 
-                $associated = $association->load($connection, $assocValues);
-
-                // Merge returned associations
-                if (!empty($associated)) {
-
-                    $result = $this->_mergeAssociated(
-                        $result,
-                        $associated,
-                        $assocKey,
-                        $colName
+                    $definition = $this->assocDefinitions[$colName];
+                    $associationSelection = \UniMapper\Entity\Selection::createAdapterSelection(
+                        $mapper,
+                        $definition->getTargetReflection(),
+                        $selection[$colName]
                     );
+
+                    $associationFilter = $mapper->unmapFilter(
+                        $definition->getTargetReflection(),
+                        $definition->getTargetFilter()
+                    );
+
+                    $associated = $association->load(
+                        $connection,
+                        $assocValues,
+                        $associationSelection,
+                        $associationFilter
+                    );
+
+                    // Merge returned associations
+                    if (!empty($associated)) {
+
+                        $result = $this->_mergeAssociated(
+                            $result,
+                            $associated,
+                            $assocKey,
+                            $colName
+                        );
+                    }
                 }
             }
         }
@@ -124,10 +151,14 @@ class Select extends \UniMapper\Query
             );
         }
 
-        return $mapper->mapCollection(
+        $collection = $mapper->mapCollection(
             $this->reflection->getName(),
             empty($result) ? [] : $result
         );
+
+        $collection->setSelection($selection);
+
+        return $collection;
     }
 
     /**
@@ -173,6 +204,7 @@ class Select extends \UniMapper\Query
      */
     private function _getQueryChecksum()
     {
+        // TODO: include filters and association selections and filters to be really unique
         return md5(
             serialize(
                 [
@@ -184,65 +216,11 @@ class Select extends \UniMapper\Query
                     "offset" => $this->offset,
                     "selection" => $this->selection,
                     "orderBy" => $this->orderBy,
-                    "adapterAssociations" => array_keys($this->adapterAssociations),
-                    "remoteAssociations" => array_keys($this->remoteAssociations),
+                    "associations" => array_keys($this->assocDefinitions),
                     "conditions" => $this->filter
                 ]
             )
         );
-    }
-
-    protected function createSelection()
-    {
-        $selection = [];
-
-        if (empty($this->selection)) {
-
-            foreach ($this->reflection->getProperties() as $property) {
-
-                // Exclude associations & computed properties & disabled mapping
-                if (!$property->hasOption(Reflection\Property\Option\Assoc::KEY)
-                    && !$property->hasOption(Reflection\Property\Option\Computed::KEY)
-                    && !($property->hasOption(Reflection\Property\Option\Map::KEY)
-                        && !$property->getOption(Reflection\Property\Option\Map::KEY))
-                ) {
-                    $selection[] = $property->getUnmapped();
-                }
-            }
-        } else {
-
-            // Add properties from filter
-            $selection = $this->selection;
-
-            // Include primary automatically if not provided
-            if ($this->reflection->hasPrimary()) {
-
-                $primaryName = $this->reflection
-                    ->getPrimaryProperty()
-                    ->getName();
-
-                if (!in_array($primaryName, $selection, true)) {
-                    $selection[] = $primaryName;
-                }
-            }
-
-            // Unmap all names
-            foreach ($selection as $index => $name) {
-                $selection[$index] = $this->reflection->getProperty($name)->getUnmapped();
-            }
-        }
-
-        // Add required keys from remote associations
-        foreach ($this->remoteAssociations as $association) {
-
-            if (($association instanceof Association\ManyToOne || $association instanceof Association\OneToOne)
-                && !in_array($association->getKey(), $selection, true)
-            ) {
-                $selection[] = $association->getKey();
-            }
-        }
-
-        return $selection;
     }
 
 }

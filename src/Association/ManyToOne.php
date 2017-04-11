@@ -19,7 +19,7 @@ class ManyToOne extends Association
     public function __construct(
         Reflection $sourceReflection,
         Reflection $targetReflection,
-        $referencingKey = null
+        array $definition = []
     ) {
         parent::__construct($sourceReflection, $targetReflection);
 
@@ -28,6 +28,8 @@ class ManyToOne extends Association
                 "Target entity must have defined primary for this relation!"
             );
         }
+
+        $referencingKey = isset($definition['by']) ? $definition['by'] : null;
 
         if (!$referencingKey) {
 
@@ -43,7 +45,7 @@ class ManyToOne extends Association
         return $this->referencingKey;
     }
 
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [], $filter = [])
     {
         // Remove empty primary values
         $primaryValues = array_filter(array_unique($primaryValues));
@@ -55,23 +57,23 @@ class ManyToOne extends Association
 
         $query = $targetAdapter->createSelect(
             $this->targetReflection->getAdapterResource(),
-            $this->getTargetSelection()
+            $selection
         );
 
-        $filter = [
+        $targetFilter = [
             $this->targetReflection->getPrimaryProperty()->getUnmapped() => [
                 Filter::EQUAL => $primaryValues
             ]
         ];
 
-        if ($this->getTargetFilter()) {
-            $filter = array_merge(
-                $connection->getMapper()->unmapFilter($this->targetReflection, $this->getTargetFilter()),
-                $filter
+        if ($filter) {
+            $targetFilter = array_merge(
+                $connection->getMapper()->unmapFilter($this->targetReflection, $filter),
+                $targetFilter
             );
         }
 
-        $query->setFilter($filter);
+        $query->setFilter($targetFilter);
 
         $result = $targetAdapter->execute($query);
 

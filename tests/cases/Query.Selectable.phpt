@@ -15,14 +15,40 @@ class QuerySelectableTest extends TestCase
 
     public function testAssociate()
     {
-        $query = $this->createQuery()->associate("adapterAssoc", "remoteAssoc");
+        \UniMapper\QueryBuilder::registerQuery(TestSelectable::class);
+
+        $connectionMock = Mockery::mock("UniMapper\Connection");
+
+        $query =  Foo::query()->testSelectable()->associate("adapterAssoc", "remoteAssoc");
+        $result = $query->run($connectionMock);
+
         Assert::same(
             Foo::getReflection()->getProperty("adapterAssoc")->getOption(Assoc::KEY),
-            $query->adapterAssociations["adapterAssoc"]
+            $result["adapterAssociations"]["adapterAssoc"]
         );
+
         Assert::type(
             "UniMapper\Association\OneToOne",
-            $query->remoteAssociations["remoteAssoc"]
+            $result["remoteAssociations"]["remoteAssoc"]
+        );
+
+        Assert::equal(
+            [
+                0 => 'id',
+                1 => 'foo',
+                2 => 'disabledMap',
+                'adapterAssoc' =>
+                    [
+                        0 => 'id',
+                        1 => 'foo',
+                        2 => 'disabledMap',
+                    ],
+                'remoteAssoc' =>
+                    [
+                        0 => 'id',
+                    ],
+            ],
+            $result['selection']
         );
     }
 
@@ -60,16 +86,30 @@ class QuerySelectableTest extends TestCase
     /**
      * @throws UniMapper\Exception\QueryException Associations, computed and properties with disabled mapping can not be selected!
      */
-    public function testSelectDisabledMapping()
-    {
-        $this->createQuery()->select("disabledMap");
-    }
+//    public function testSelectDisabledMapping()
+//    {
+//        $this->createQuery()->select("disabledMap");
+//    }
 
     private function createQuery()
     {
         return Foo::query()->select();
     }
 
+}
+
+class TestSelectable extends Query {
+
+    use Query\Selectable;
+
+    protected function onExecute(\UniMapper\Connection $connection)
+    {
+        return [
+            'remoteAssociations' => $this->createRemoteAssociations(),
+            'selection' => $this->createQuerySelection(),
+            'adapterAssociations' => $this->getAdapterAssociations(),
+        ];
+    }
 }
 
 /**

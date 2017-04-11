@@ -17,6 +17,9 @@ class RepositoryTest extends TestCase
     /** @var \Mockery\Mock $adapterMock */
     private $adapterMock;
 
+    /** @var  \UniMapper\Connection */
+    private $connection;
+
     public function setUp()
     {
         $this->adapterMock = Mockery::mock("UniMapper\Adapter");
@@ -25,13 +28,26 @@ class RepositoryTest extends TestCase
 
     private function createRepository($name, array $adapters = [])
     {
-        $connection = new \UniMapper\Connection(new \UniMapper\Mapper);
+        $this->connection = new \UniMapper\Connection(new \UniMapper\Mapper);
         foreach ($adapters as $adapterName => $adapter) {
-            $connection->registerAdapter($adapterName, $adapter);
+            $this->connection->registerAdapter($adapterName, $adapter);
         }
 
         $class = Convention::nameToClass($name, Convention::REPOSITORY_MASK);
-        return new $class($connection);
+        return new $class($this->connection);
+    }
+
+    /**
+     * Create's unmapped selection for given entity
+     *
+     * @param string $entity Entity name
+     *
+     * @return array
+     */
+    private function createSelection($entity) {
+        $reflection = \UniMapper\Entity\Reflection::load($entity);
+        $selection = \UniMapper\Entity\Selection::generateEntitySelection($reflection);
+        return \UniMapper\Entity\Selection::createAdapterSelection($this->connection->getMapper(), $reflection, $selection);
     }
 
     public function testGetName()
@@ -249,7 +265,7 @@ class RepositoryTest extends TestCase
         $adapterQueryMock = Mockery::mock("UniMapper\Adapter\IQuery");
 
         $this->adapterMock->shouldReceive("createSelectOne")
-            ->with("Entity", "id", 1)
+            ->with("Entity", "id", 1, ["id" => "id", "foo" => "foo"])
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")
@@ -266,7 +282,7 @@ class RepositoryTest extends TestCase
         $adapterQueryMock = Mockery::mock("UniMapper\Adapter\IQuery");
 
         $this->adapterMock->shouldReceive("createSelectOne")
-            ->with("Entity", "id", 1)
+            ->with("Entity", "id", 1, $this->createSelection('Entity'))
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")
@@ -285,7 +301,7 @@ class RepositoryTest extends TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [1, 2]]]);
 
         $this->adapterMock->shouldReceive("createSelect")
-            ->with("Entity", ['id', 'foo', 'entity', 'collection'], [], null, null)
+            ->with("Entity", $this->createSelection('Entity'), [], null, null)
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")

@@ -71,6 +71,11 @@ class Map implements Reflection\Property\IOption
             $disabled = true;
         }
 
+        // Exclude TODO: deprecated backward compatibility to be removed in next version
+        if (array_key_exists(self::KEY . "-exclude", $parameters)) {
+            $disabled = true;
+        }
+
         // By
         if (array_key_exists(self::KEY . "-by", $parameters)) {
             $by = $parameters[self::KEY . "-by"];

@@ -16,7 +16,7 @@ class Delete extends \UniMapper\Query
             $this->reflection->getAdapterResource()
         );
 
-        $this->setQueryFilters($this->filter, $query, $connection);
+        $this->setQueryFilters($this->filter, $query, $connection->getMapper());
 
         return (int) $adapter->execute($query);
     }

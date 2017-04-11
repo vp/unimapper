@@ -1,6 +1,7 @@
 <?php
 
 use Tester\Assert;
+use UniMapper\Mapper;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -29,6 +30,10 @@ class ProfilerTest extends TestCase
             ->once()
             ->with("Foo")
             ->andReturn($adapterMock);
+
+        $connectionMock->shouldReceive("getMapper")
+            ->once()
+            ->andReturn(new Mapper);
 
         $query = new UniMapper\Query\Count(
             UniMapper\Entity\Reflection::load("Entity")

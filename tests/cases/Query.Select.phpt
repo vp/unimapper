@@ -55,7 +55,7 @@ class QuerySelectTest extends TestCase
             ->andReturn($this->fooAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ["text_unmapped", "fooId"], [], null, null)
+            ->with("fooResource", ["text" => "text_unmapped", "id" => "fooId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
@@ -95,7 +95,7 @@ class QuerySelectTest extends TestCase
         $this->fooAdapterMock->shouldReceive("createSelect")
             ->with(
                 "fooResource",
-                ["fooId"],
+                ["id"=>"fooId"],
                 [],
                 null,
                 null
@@ -131,7 +131,7 @@ class QuerySelectTest extends TestCase
             ->andReturn($this->barAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ["fooId"], [], null, null)
+            ->with("fooResource", ["id"=>"fooId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -160,7 +160,7 @@ class QuerySelectTest extends TestCase
             ->with(["barId" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("barResource")
+            ->with("barResource", ["id" => "barId"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")
@@ -190,11 +190,11 @@ class QuerySelectTest extends TestCase
 
         $cacheMock = Mockery::mock("UniMapper\Cache\ICache");
         $cacheMock->shouldReceive("load")
-            ->with("f6f90e5cc3cbc700edc3c6860388559e")
+            ->with("8e5dc62a66c880904cde80c14555b302")
             ->andReturn(false);
         $cacheMock->shouldReceive("save")
             ->with(
-                "f6f90e5cc3cbc700edc3c6860388559e",
+                "8e5dc62a66c880904cde80c14555b302",
                 [["fooId" => 3], ["fooId" => 4]],
                 [
                     Cache\ICache::TAGS => ["myTag"],
@@ -214,7 +214,7 @@ class QuerySelectTest extends TestCase
             ->andReturn($cacheMock);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ["fooId"], [], null, null)
+            ->with("fooResource", ["id"=>"fooId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -243,7 +243,7 @@ class QuerySelectTest extends TestCase
         $cacheMock = Mockery::mock("UniMapper\Cache\ICache");
         $cacheMock->shouldReceive("load")
             ->once()
-            ->with("f6f90e5cc3cbc700edc3c6860388559e")
+            ->with("8e5dc62a66c880904cde80c14555b302")
             ->andReturn([["fooId" => 3], ["fooId" => 4]]);
 
         $this->connectionMock->shouldReceive("getMapper")
@@ -280,7 +280,7 @@ class QuerySelectTest extends TestCase
             ->andReturn(new UniMapper\Mapper);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ['fooId', 'text_unmapped'], [], null, null)
+            ->with("fooResource", ['id'=>'fooId', 'text'=>'text_unmapped'], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
@@ -306,8 +306,8 @@ class QuerySelectTest extends TestCase
             ->with(
                 "fooResource",
                 [
-                    'text_unmapped',
-                    'fooId'
+                    'text'=>'text_unmapped',
+                    'id'=>'fooId'
                 ],
                 [],
                 null,

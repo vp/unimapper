@@ -28,7 +28,7 @@ interface IAdapter
      *
      * @return IQuery
      */
-    public function createSelectOne($resource, $column, $primaryValue);
+    public function createSelectOne($resource, $column, $primaryValue, $selection = []);
 
     /**
      * @param string $resource

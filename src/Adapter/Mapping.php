@@ -28,4 +28,19 @@ abstract class Mapping
         return $name;
     }
 
+    /**
+     * Unmap selection
+     *
+     * @param \UniMapper\Entity\Reflection $reflection   Entity reflection
+     * @param array                        $selection    Selection array
+     * @param \UniMapper\Association[]     $associations Optional associations
+     * @param \UniMapper\Mapper            $mapper       Mapper instance
+     *
+     * @return array
+     */
+    public function unmapSelection(Reflection $reflection, array $selection, array $associations = [], \UniMapper\Mapper $mapper)
+    {
+        return $selection;
+    }
+
 }

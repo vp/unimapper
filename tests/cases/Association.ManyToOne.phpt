@@ -50,7 +50,7 @@ class AssociationManyToOneTest extends TestCase
             ->with(["id" => [Filter::EQUAL => [1, 2]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("Bar")
+            ->with("Bar", [])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")

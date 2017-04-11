@@ -2,6 +2,9 @@
 
 namespace UniMapper;
 
+use UniMapper\Entity\Reflection;
+use UniMapper\Query\Selectable;
+
 abstract class Adapter implements Adapter\IAdapter
 {
 
@@ -48,5 +51,6 @@ abstract class Adapter implements Adapter\IAdapter
     {
         $this->afterExecute[] = $callback;
     }
+
 
 }
