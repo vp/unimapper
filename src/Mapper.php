@@ -8,7 +8,7 @@ use UniMapper\Entity\Reflection;
 class Mapper
 {
 
-    /** @var array */
+    /** @var array|\UniMapper\Adapter\Mapping */
     private $adapterMappings = [];
 
     public function registerAdapterMapping($name, Adapter\Mapping $mapping)

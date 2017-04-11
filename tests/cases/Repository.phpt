@@ -7,7 +7,7 @@ use UniMapper\NamingConvention as UNC;
 require __DIR__ . '/../bootstrap.php';
 
 /**
- * @testCase
+ * @testCaseUNC
  */
 class RepositoryTest extends \Tester\TestCase
 {
@@ -18,6 +18,9 @@ class RepositoryTest extends \Tester\TestCase
     /** @var \Mockery\Mock $adapterMock */
     private $adapterMock;
 
+    /** @var  \UniMapper\Connection */
+    private $connection;
+
     public function setUp()
     {
         $this->adapterMock = Mockery::mock("UniMapper\Adapter");
@@ -26,13 +29,26 @@ class RepositoryTest extends \Tester\TestCase
 
     private function createRepository($name, array $adapters = [])
     {
-        $connection = new \UniMapper\Connection(new \UniMapper\Mapper);
+        $this->connection = new \UniMapper\Connection(new \UniMapper\Mapper);
         foreach ($adapters as $adapterName => $adapter) {
-            $connection->registerAdapter($adapterName, $adapter);
+            $this->connection->registerAdapter($adapterName, $adapter);
         }
 
         $class = UNC::nameToClass($name, UNC::REPOSITORY_MASK);
-        return new $class($connection);
+        return new $class($this->connection);
+    }
+
+    /**
+     * Create's unmapped selection for given entity
+     *
+     * @param string $entity Entity name
+     *
+     * @return array
+     */
+    private function createSelection($entity) {
+        $reflection = \UniMapper\Entity\Reflection::load($entity);
+        $selection = \UniMapper\Entity\Selection::generateEntitySelection($reflection);
+        return \UniMapper\Entity\Selection::createAdapterSelection($this->connection->getMapper(), $reflection, $selection);
     }
 
     public function testGetName()
@@ -248,7 +264,7 @@ class RepositoryTest extends \Tester\TestCase
         $adapterQueryMock = Mockery::mock("UniMapper\Adapter\IQuery");
 
         $this->adapterMock->shouldReceive("createSelectOne")
-            ->with("simple_resource", "simplePrimaryId", 1)
+            ->with("simple_resource", "simplePrimaryId", 1, $this->createSelection('Simple'))
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")
@@ -267,7 +283,7 @@ class RepositoryTest extends \Tester\TestCase
         $adapterQueryMock = Mockery::mock("UniMapper\Adapter\IQuery");
 
         $this->adapterMock->shouldReceive("createSelectOne")
-            ->with("simple_resource", "simplePrimaryId", 1)
+            ->with("simple_resource", "simplePrimaryId", 1, $this->createSelection('Simple'))
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")
@@ -287,7 +303,7 @@ class RepositoryTest extends \Tester\TestCase
         $adapterQueryMock->shouldReceive("getRaw")->once();
 
         $this->adapterMock->shouldReceive("createSelect")
-            ->with("simple_resource", ['simplePrimaryId', 'text', 'empty', 'link', 'email_address', 'time', 'date', 'ip', 'mark', 'entity', 'readonly', 'stored_data', 'enumeration'], [], null, null)
+            ->with("simple_resource", $this->createSelection('Simple'), [], null, null)
             ->once()
             ->andReturn($adapterQueryMock);
         $this->adapterMock->shouldReceive("onExecute")

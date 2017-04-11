@@ -5,7 +5,6 @@ namespace UniMapper;
 use UniMapper\Adapter\IQuery;
 use UniMapper\Adapter\IQueryWithJoins;
 use UniMapper\Exception\QueryException;
-use UniMapper\Query\Filterable;
 
 abstract class Query
 {
@@ -23,14 +22,6 @@ abstract class Query
         }
 
         $this->entityReflection = $reflection;
-    }
-
-    /**
-     * @return \UniMapper\Entity\Reflection
-     */
-    public function getEntityReflection()
-    {
-        return $this->entityReflection;
     }
 
     public function __get($name)
@@ -94,4 +85,5 @@ abstract class Query
         }
     }
 
+    abstract protected function onExecute(\UniMapper\Connection $connection);
 }

@@ -5,22 +5,6 @@ namespace UniMapper\Entity;
 
 class Selection
 {
-
-    /**
-     * Selection entity reflection
-     *
-     * @var \UniMapper\Entity\Reflection
-     */
-    protected $entityReflection;
-
-    /**
-     * @param mixed $entity Entity object, class or name
-     */
-    public function __construct($entity)
-    {
-        $this->entityReflection = \UniMapper\Entity\Reflection::load($entity);
-    }
-
     /**
      * Generates selection for only entity properties
      *
@@ -30,6 +14,20 @@ class Selection
      */
     public static function generateEntitySelection(Reflection $entityReflection)
     {
+        return self::_traverseEntityForSelection($entityReflection);
+    }
+
+    /**
+     * Internal function for entity property selection generation
+     *
+     * @param \UniMapper\Entity\Reflection $entityReflection Entity reflection
+     * @param array                        $nesting          Nesting check
+     *
+     * @return array
+     */
+    private static function _traverseEntityForSelection(Reflection $entityReflection, &$nesting = [])
+    {
+        $nesting[] = $entityReflection->getName();
         $selection = [];
         foreach ($entityReflection->getProperties() as $property) {
             // Exclude not mapped
@@ -39,12 +37,17 @@ class Selection
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                    $selection[$property->getName()] = self::generateEntitySelection($targetReflection);
+                    if (in_array($targetReflection->getName(), $nesting) !== false) {
+                        continue;
+                    }
+                    $selection[$property->getName()] = self::_traverseEntityForSelection($targetReflection, $nesting);
                 } else {
                     $selection[] = $property->getName();
                 }
             }
         }
+
+        array_pop($nesting);
         return $selection;
     }
     
@@ -86,6 +89,7 @@ class Selection
      *
      * - Filter out properties witch are not selectable by query (assoc, computed, ...)
      * - Reformat partial selections ['foo' => ['bar', 'baz']]  to [0 => [0 => 'foo', 1 => ['bar', 'baz']]]
+     * - merge duplicates
      *
      * @param \UniMapper\Entity\Reflection $entityReflection Entity reflection
      * @param array                        $selection        Selection array
@@ -180,6 +184,114 @@ class Selection
                 }
             }
         }
+        return $result;
+    }
+
+    public static function validateInputSelection(Reflection $reflection, array $selection)
+    {
+        foreach ($selection as $index => $value) {
+            if (is_array($value)) {
+                $propertyName = $index;
+            } else if (is_scalar($value)) {
+                $propertyName = $value;
+                $value = null;
+            } else {
+                throw new \UniMapper\Exception\QueryException(
+                    "Invalid selection for "
+                    . $reflection->getClassName() . "!"
+                );
+            }
+
+            if (!$reflection->hasProperty($propertyName)) {
+                throw new \UniMapper\Exception\QueryException(
+                    "Property '" . $propertyName . "' is not defined on entity "
+                    . $reflection->getClassName() . "!"
+                );
+            }
+
+            if (is_array($value)) {
+                $property = $reflection->getProperty($propertyName);
+
+                if (
+                    in_array($property->getType(), [\UniMapper\Entity\Reflection\Property::TYPE_ENTITY, \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION]) === false
+                ) {
+                    throw new \UniMapper\Exception\QueryException(
+                        "Invalid nested selection, property '" . $propertyName . "' is not entity or collection on entity "
+                        . $reflection->getClassName() . "!"
+                    );
+                }
+
+                $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                self::validateInputSelection($propertyTypeReflection, $value);
+            }
+        }
+    }
+
+    /**
+     * Create's unmapped selection for adapter query
+     *
+     * @param \UniMapper\Mapper            $mapper       Mapper instance
+     * @param \UniMapper\Entity\Reflection $reflection   Target entity reflection
+     * @param array                        $selection    Query selection
+     * @param array                        $associations Optional associations
+     *
+     * @return array
+     */
+    public static function createAdapterSelection(\UniMapper\Mapper $mapper, Reflection $reflection, array $selection = [], array $associations = [])
+    {
+        //- normalize it before unmap
+        $selection = self::normalizeEntitySelection($reflection, $selection);
+
+        //- unmap selection for adapter
+        $selection = $mapper->unmapSelection(
+            $reflection,
+            $selection,
+            $associations ? $associations['local'] : []
+        );
+
+        if ($associations) {
+            // Add required keys from remote associations (must be after unmapping because ref key is unmapped)
+            foreach ($associations['remote'] as $association) {
+
+                if (($association instanceof \UniMapper\Association\ManyToOne || $association instanceof \UniMapper\Association\OneToOne)
+                    && !in_array($association->getReferencingKey(), $selection, true)
+                ) {
+                    $selection[$association->getReferencingKey()] = $association->getReferencingKey();
+                }
+            }
+        }
+
+        return $selection;
+    }
+
+    /**
+     * Recursively appends elements of remaining keys from the second array to the first.
+     * @return array
+     */
+    public static function mergeArrays($arr1, $arr2)
+    {
+        $arrays = func_get_args();
+        $result = array();
+
+        foreach ($arrays as $array) {
+            foreach ($array as $key => $value) {
+                // Renumber integer keys as array_merge_recursive() does. Note that PHP
+                // automatically converts array keys that are integer strings (e.g., '1')
+                // to integers.
+                if (is_integer($key)) {
+                    $result[] = $value;
+                }
+                // Recurse when both values are arrays.
+                elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value)) {
+                    $result[$key] = self::mergeArrays($result[$key], $value);
+                }
+                // Otherwise, use the latter value, overriding any previous value.
+                else {
+                    $result[$key] = $value;
+                }
+            }
+        }
+
         return $result;
     }
 }

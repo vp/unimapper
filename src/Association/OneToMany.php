@@ -34,13 +34,13 @@ class OneToMany extends Multi
         return $this->mapBy[0];
     }
 
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [])
     {
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
 
         $query = $targetAdapter->createSelect(
             $this->getTargetResource(),
-            $this->getTargetSelection(),
+            $selection,
             $this->orderBy,
             $this->limit,
             $this->offset

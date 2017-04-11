@@ -72,7 +72,7 @@ abstract class Association
     /**
      * Key name that refers target results to source entity
      *
-     * @return type
+     * @return string
      */
     public function getKey()
     {
@@ -195,5 +195,7 @@ abstract class Association
 
         return $converted;
     }
+
+    abstract public function load(Connection $connection, array $primaryValues, array $selection = []);
 
 }

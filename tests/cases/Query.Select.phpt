@@ -51,7 +51,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
             ->with(
                 "simple_resource",
-                ["link", "text", "simplePrimaryId"],
+                ["text" => "text"],
                 [],
                 null,
                 null
@@ -83,7 +83,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
             ->with(
                 "resource",
-                ["text", "empty"],
+                ["text" => "text", "empty" => "empty"],
                 [],
                 null,
                 null
@@ -109,7 +109,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getAdapter")->once()->with("RemoteAdapter")->andReturn($this->adapters["RemoteAdapter"]);
 
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
-            ->with("simple_resource", ["simplePrimaryId", "remoteId"], [], null, null)
+            ->with("simple_resource", ["id" => "simplePrimaryId", "remoteId" => "remoteId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["FooAdapter"]->shouldReceive("onExecute")
@@ -121,7 +121,7 @@ class QuerySelectTest extends \Tester\TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelect")
-            ->with("remote_resource", [])
+            ->with("remote_resource", ["id" => "id", "text" => "text"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["RemoteAdapter"]->shouldReceive("onExecute")
@@ -155,7 +155,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
             ->with(
                 "simple_resource",
-                ["simplePrimaryId"],
+                ["id" => "simplePrimaryId"],
                 [],
                 null,
                 null
@@ -183,7 +183,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getAdapter")->once()->with("RemoteAdapter")->andReturn($this->adapters["RemoteAdapter"]);
 
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
-            ->with("simple_resource", ["simplePrimaryId"], [], null, null)
+            ->with("simple_resource", ["id" => "simplePrimaryId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["FooAdapter"]->shouldReceive("onExecute")
@@ -221,7 +221,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getAdapter")->once()->with("RemoteAdapter")->andReturn($this->adapters["RemoteAdapter"]);
 
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
-            ->with("simple_resource", ["simplePrimaryId"], [], null, null)
+            ->with("simple_resource", ["id" => "simplePrimaryId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["FooAdapter"]->shouldReceive("onExecute")
@@ -250,7 +250,7 @@ class QuerySelectTest extends \Tester\TestCase
             ->with(["id" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelect")
-            ->with("remote_resource", [], [], null, null)
+            ->with("remote_resource", ['id' => 'id', 'text'=>'text'], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["RemoteAdapter"]->shouldReceive("onExecute")
@@ -281,7 +281,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getAdapter")->once()->with("RemoteAdapter")->andReturn($this->adapters["RemoteAdapter"]);
 
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelect")
-            ->with("remote_resource", ["id"], [], null, null)
+            ->with("remote_resource", ["id" => "id"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["RemoteAdapter"]->shouldReceive("onExecute")
@@ -310,7 +310,34 @@ class QuerySelectTest extends \Tester\TestCase
             ->with(["simplePrimaryId" => [\UniMapper\Entity\Filter::EQUAL => [1, 2]]])
             ->once();
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
-            ->with("simple_resource", [], [], null, null)
+            ->with(
+                "simple_resource",
+                [
+                    'id' => 'simplePrimaryId',
+                    'text' => 'text',
+                    'empty' => 'empty',
+                    'url' => 'link',
+                    'email' => 'email_address',
+                    'time' => 'time',
+                    'date' => 'date',
+                    'ip' => 'ip',
+                    'mark' => 'mark',
+                    'entity' =>
+                        array (
+                            'entity' =>
+                                array (
+                                    'id' => 'id',
+                                    'text' => 'text',
+                                ),
+                        ),
+                    'readonly' => 'readonly',
+                    'storedData' => 'stored_data',
+                    'enumeration' => 'enumeration',
+                ],
+                [],
+                null,
+                null
+            )
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["FooAdapter"]->shouldReceive("onExecute")
@@ -363,7 +390,7 @@ class QuerySelectTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getCache")->once()->andReturn($cacheMock);
 
         $this->adapters["FooAdapter"]->shouldReceive("createSelect")
-            ->with("simple_resource", ["simplePrimaryId"], [], null, null)
+            ->with("simple_resource", ["id" => "simplePrimaryId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["FooAdapter"]->shouldReceive("onExecute")
@@ -426,6 +453,99 @@ class QuerySelectTest extends \Tester\TestCase
         $this->createQuery()->select("undefined");
     }
 
+    /**
+     * @throws UniMapper\Exception\QueryException Property 'undefined' is not defined on entity UniMapper\Tests\Fixtures\Entity\Nested!
+     */
+    public function testSelectUndefinedNestedProperty()
+    {
+        $this->createQuery()->select(["entity" => ["undefined"]]);
+    }
+
+    /**
+     * @throws UniMapper\Exception\QueryException Invalid nested selection, property 'text' is not entity or collection on entity UniMapper\Tests\Fixtures\Entity\Simple!
+     */
+    public function testSelectInvalidNestedProperty()
+    {
+        $this->createQuery()->select(["text" => ["foo", "bar", "baz"]]);
+    }
+
+    public function testSelectNested()
+    {
+        $this->connectionMock->shouldReceive("getMapper")->once()->andReturn(new UniMapper\Mapper);
+        $this->connectionMock->shouldReceive("getAdapter")->once()->with("FooAdapter")->andReturn($this->adapters["FooAdapter"]);
+
+        $query = $this->createQuery()->select(["entity" => ["entity"]]);
+        Assert::same(
+            [ //<------------------ Simple: only entity property was selected
+                "entity" =>
+                    [ //<--------- Nested: only entity property
+                    "entity" =>
+                        [ //<----- Simple: generated selection
+                        'id',
+                        'text',
+                        'empty',
+                        'url',
+                        'email',
+                        'time',
+                        'date',
+                        'ip',
+                        'mark',
+                        'entity' => ['id', 'text'], // Todo: should or not select automatically select this Nested?
+                        'readonly',
+                        'storedData',
+                        'enumeration',
+                    ]
+                ]
+            ],
+            $query->getQuerySelection()
+        );
+
+        $this->adapters["FooAdapter"]->shouldReceive("createSelect")
+            ->with("simple_resource", [
+                'entity' =>
+                    [
+                        'entity' =>
+                            [
+                                'entity' =>
+                                    [
+                                        'entity' =>
+                                            [
+                                                'id' => 'simplePrimaryId',
+                                                'text' => 'text',
+                                                'empty' => 'empty',
+                                                'url' => 'link',
+                                                'email' => 'email_address',
+                                                'time' => 'time',
+                                                'date' => 'date',
+                                                'ip' => 'ip',
+                                                'mark' => 'mark',
+                                                'entity' =>
+                                                    [
+                                                        'entity' =>
+                                                            [
+                                                                'id' => 'id',
+                                                                'text' => 'text',
+                                                            ],
+                                                    ],
+                                                'readonly' => 'readonly',
+                                                'storedData' => 'stored_data',
+                                                'enumeration' => 'enumeration',
+                                            ],
+                                    ],
+                            ],
+                    ],
+            ], [], null, null)
+            ->once()
+            ->andReturn($this->adapterQueryMock);
+
+        $this->adapters["FooAdapter"]->shouldReceive("onExecute")
+            ->with($this->adapterQueryMock)
+            ->once()
+            ->andReturn(false);
+
+        $query->run($this->connectionMock);
+    }
+
     public function testAssociateOnoToMany()
     {
         $this->connectionMock->shouldReceive("getMapper")->once()->andReturn(new UniMapper\Mapper);
@@ -475,7 +595,7 @@ class QuerySelectTest extends \Tester\TestCase
             ->andReturn([['simplePrimaryId' => 100], ['simplePrimaryId' => 101], ['simplePrimaryId' => 102]]);
 
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelect")
-            ->with("remote_resource", [], [], null, null)
+            ->with("remote_resource", ['id'=>'id','text'=>'text'], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
