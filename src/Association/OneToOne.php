@@ -50,11 +50,11 @@ class OneToOne extends Single
         return $this->targetReflection->getPrimaryProperty()->getName(true);
     }
 
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [])
     {
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
 
-        $query = $targetAdapter->createSelect($this->getTargetResource(), $this->getTargetSelection());
+        $query = $targetAdapter->createSelect($this->getTargetResource(), $selection);
 
         $filter = $this->filter;
         $filter[$this->getTargetPrimaryKey()][Entity\Filter::EQUAL] = $primaryValues;

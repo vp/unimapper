@@ -78,7 +78,7 @@ class ManyToMany extends Multi
     /**
      * @todo should be optimized with 1 query only on same adapters
      */
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [])
     {
         $currentAdapter = $connection->getAdapter($this->sourceReflection->getAdapterName());
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
@@ -111,7 +111,7 @@ class ManyToMany extends Multi
 
         $targetQuery = $targetAdapter->createSelect(
             $this->getTargetResource(),
-            $this->getTargetSelection(),
+            $selection,
             $this->orderBy,
             $this->limit,
             $this->offset

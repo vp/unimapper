@@ -24,6 +24,27 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
         Entity::CHANGE_REMOVE => []
     ];
 
+    private $selection = [];
+
+    /**
+     * @param array $selection
+     */
+    public function setSelection($selection)
+    {
+        $this->selection = $selection;
+        foreach ($this->data as $entity) {
+            $entity->setSelection($selection);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return $this->selection;
+    }
+
     /**
      * @param string|Entity $name   Entity name, class or entity object
      * @param mixed         $values
@@ -177,7 +198,6 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function offsetSet($offset, $value)
     {
         $this->_validateEntity($value);
-
         if (is_null($offset)) {
             $this->data[] = $value;
         } else {
@@ -232,6 +252,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function toArray($nesting = false)
     {
         return array_map(function (Entity $entity) use ($nesting) {
+            $entity->setSelection($this->getSelection());
             return $entity->toArray($nesting);
         }, $this->data);
     }
@@ -244,6 +265,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
     public function jsonSerialize()
     {
         return array_map(function (Entity $entity) {
+            $entity->setSelection($this->getSelection());
             return $entity->jsonSerialize();
         }, $this->data);
     }

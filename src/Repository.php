@@ -356,10 +356,15 @@ abstract class Repository
      *
      * @return QueryBuilder
      */
-    protected function query()
+    public function query()
     {
         $class = UNC::nameToClass($this->getEntityName(), UNC::ENTITY_MASK);
         return $class::query();
+    }
+
+    public function executeQuery(\UniMapper\Query $query)
+    {
+        return $query->run($this->connection);
     }
 
 }

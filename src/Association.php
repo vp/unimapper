@@ -55,6 +55,15 @@ abstract class Association
         }
     }
 
+    /**
+     * @internal
+     * @return array
+     */
+    public function getMapBy()
+    {
+        return $this->mapBy;
+    }
+
     public function getPrimaryKey()
     {
         return $this->sourceReflection->getPrimaryProperty()->getName(true);
@@ -63,7 +72,7 @@ abstract class Association
     /**
      * Key name that refers target results to source entity
      *
-     * @return type
+     * @return string
      */
     public function getKey()
     {
@@ -94,8 +103,8 @@ abstract class Association
     {
         // optional checkout through annotation parameter
         $sourceProperty = $this->sourceReflection->getProperty($this->getPropertyName());
-        if ($sourceProperty->hasOption('assoc-remote')) {
-            $assocRemote = $sourceProperty->getOption('assoc-remote');
+        if ($sourceProperty->hasOption(\UniMapper\Entity\Reflection\Property::OPTION_ASSOC_REMOTE)) {
+            $assocRemote = $sourceProperty->getOption(\UniMapper\Entity\Reflection\Property::OPTION_ASSOC_REMOTE);
             return $assocRemote === 'true' || is_int($assocRemote) ? (bool) $assocRemote : false;
         }
         // default behaviour
@@ -186,5 +195,7 @@ abstract class Association
 
         return $converted;
     }
+
+    abstract public function load(Connection $connection, array $primaryValues, array $selection = []);
 
 }

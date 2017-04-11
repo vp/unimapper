@@ -54,9 +54,10 @@ class Select extends \UniMapper\Query
             }
         }
 
+        $selection = $this->getQuerySelection();
         $query = $adapter->createSelect(
             $this->entityReflection->getAdapterResource(),
-            $this->createSelection(),
+            \UniMapper\Entity\Selection::createAdapterSelection($mapper, $this->entityReflection, $selection, $this->associations),
             $this->orderBy,
             $this->limit,
             $this->offset
@@ -76,6 +77,7 @@ class Select extends \UniMapper\Query
 
             settype($result, "array");
 
+            /** @var \UniMapper\Association $association */
             foreach ($this->associations["remote"] as $colName => $association) {
 
                 $assocKey = $association->getKey();
@@ -90,7 +92,17 @@ class Select extends \UniMapper\Query
                     }
                 }
 
-                $associated = $association->load($connection, $assocValues);
+                $associationSelection = \UniMapper\Entity\Selection::createAdapterSelection(
+                    $mapper,
+                    $association->getTargetReflection(),
+                    $selection[$association->getPropertyName()]
+                );
+
+                $associated = $association->load(
+                    $connection,
+                    $assocValues,
+                    $associationSelection
+                );
 
                 // Merge returned associations
                 if (!empty($associated)) {
@@ -130,10 +142,14 @@ class Select extends \UniMapper\Query
             );
         }
 
-        return $mapper->mapCollection(
+        $collection = $mapper->mapCollection(
             $this->entityReflection->getName(),
             empty($result) ? [] : $result
         );
+
+        $collection->setSelection($this->getQuerySelection());
+
+        return $collection;
     }
 
     /**

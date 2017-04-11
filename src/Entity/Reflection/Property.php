@@ -22,9 +22,11 @@ class Property
 
     const OPTION_ASSOC = "assoc",
           OPTION_ASSOC_BY = "assoc-by",
+          OPTION_ASSOC_REMOTE = "assoc-remote",
           OPTION_COMPUTED = "computed",
           OPTION_ENUM = "enum",
           OPTION_MAP = "map",
+          OPTION_NOT_MAP = "map-exclude",
           OPTION_MAP_BY = "map-by",
           OPTION_MAP_FILTER = "map-filter",
           OPTION_PRIMARY = "primary";

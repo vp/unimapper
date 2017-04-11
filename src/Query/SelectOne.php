@@ -2,6 +2,7 @@
 
 namespace UniMapper\Query;
 
+use UniMapper\Entity\Selection;
 use UniMapper\Exception,
     UniMapper\Entity\Reflection;
 
@@ -43,6 +44,7 @@ class SelectOne extends \UniMapper\Query
         $adapter = $connection->getAdapter($this->entityReflection->getAdapterName());
 
         $primaryProperty = $this->entityReflection->getPrimaryProperty();
+        $selection = $this->getQuerySelection();
 
         $query = $adapter->createSelectOne(
             $this->entityReflection->getAdapterResource(),
@@ -50,7 +52,8 @@ class SelectOne extends \UniMapper\Query
             $connection->getMapper()->unmapValue(
                 $primaryProperty,
                 $this->primaryValue
-            )
+            ),
+            Selection::createAdapterSelection($connection->getMapper(), $this->entityReflection, $selection, $this->associations)
         );
 
         if ($this->associations["local"]) {
@@ -68,11 +71,22 @@ class SelectOne extends \UniMapper\Query
 
             settype($result, "array");
 
+            /** @var \UniMapper\Association $association */
             foreach ($this->associations["remote"] as $colName => $association) {
 
                 $assocValue = $result[$association->getKey()];
 
-                $associated = $association->load($connection, [$assocValue]);
+                $associationSelection = Selection::createAdapterSelection(
+                    $connection->getMapper(),
+                    $association->getTargetReflection(),
+                    $selection[$association->getPropertyName()]
+                );
+
+                $associated = $association->load(
+                    $connection,
+                    [$assocValue],
+                    $associationSelection
+                );
 
                 // Merge returned associations
                 if (isset($associated[$assocValue])) {
@@ -81,7 +95,11 @@ class SelectOne extends \UniMapper\Query
             }
         }
 
-        return $connection->getMapper()->mapEntity($this->entityReflection->getName(), $result);
+        $entity = $connection->getMapper()->mapEntity($this->entityReflection->getName(), $result);
+
+        $entity->setSelection($this->getQuerySelection());
+
+        return $entity;
     }
 
 }

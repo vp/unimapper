@@ -5,7 +5,6 @@ namespace UniMapper;
 use UniMapper\Adapter\IQuery;
 use UniMapper\Adapter\IQueryWithJoins;
 use UniMapper\Exception\QueryException;
-use UniMapper\Query\Filterable;
 
 abstract class Query
 {
@@ -86,4 +85,5 @@ abstract class Query
         }
     }
 
+    abstract protected function onExecute(\UniMapper\Connection $connection);
 }

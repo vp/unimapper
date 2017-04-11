@@ -50,7 +50,7 @@ class ManyToOne extends Single
         return $this->targetReflection->getPrimaryProperty()->getName(true);
     }
 
-    public function load(Connection $connection, array $primaryValues)
+    public function load(Connection $connection, array $primaryValues, array $selection = [])
     {
         // Remove empty primary values
         $primaryValues = array_filter(array_unique($primaryValues));
@@ -60,7 +60,7 @@ class ManyToOne extends Single
 
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
 
-        $query = $targetAdapter->createSelect($this->getTargetResource(), $this->getTargetSelection());
+        $query = $targetAdapter->createSelect($this->getTargetResource(), $selection);
 
         // Set target conditions
         $filter = $this->filter;
