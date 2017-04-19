@@ -23,6 +23,9 @@ abstract class Association
     /** @var  array */
     protected $targetSelection = [];
 
+    /** @var array  */
+    protected $targetSelectionUnampped = [];
+
     /** @var array array */
     protected $targetFilter = [];
 
@@ -126,6 +129,22 @@ abstract class Association
     public function setTargetSelection(array $targetSelection)
     {
         $this->targetSelection = $targetSelection;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTargetSelectionUnampped()
+    {
+        return $this->targetSelectionUnampped;
+    }
+
+    /**
+     * @param array $targetSelectionUnampped
+     */
+    public function setTargetSelectionUnampped($targetSelectionUnampped)
+    {
+        $this->targetSelectionUnampped = $targetSelectionUnampped;
     }
 
     public function getTargetFilter()

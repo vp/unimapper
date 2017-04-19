@@ -92,16 +92,10 @@ class Select extends \UniMapper\Query
                     }
                 }
 
-                $associationSelection = \UniMapper\Entity\Selection::createAdapterSelection(
-                    $mapper,
-                    $association->getTargetReflection(),
-                    $selection[$association->getPropertyName()]
-                );
-
                 $associated = $association->load(
                     $connection,
                     $assocValues,
-                    $associationSelection
+                    $association->getTargetSelectionUnampped()
                 );
 
                 // Merge returned associations
