@@ -33,7 +33,6 @@ class Selection
             // Exclude not mapped
             if (!$property->hasOption(Reflection\Property::OPTION_COMPUTED)
                 && !$property->hasOption(Reflection\Property::OPTION_ASSOC)
-                && !$property->hasOption(Reflection\Property::OPTION_NOT_MAP)
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
@@ -99,7 +98,7 @@ class Selection
      */
     public static function normalizeEntitySelection(\UniMapper\Entity\Reflection $entityReflection, $selection)
     {
-        $returnSelection = [];
+        $returnSelection = ['entity' => [], 'associated' => []];
         $map = [];
         foreach ($selection as $index => $name) {
 
@@ -119,38 +118,41 @@ class Selection
 
             $property = $entityReflection->getProperty($name);
             if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
-                || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
             ) {
-                //- skip assoc and computed
-                continue;
-            }
-
-            if ($partialSelection) {
                 $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                if (isset($map[$name])) {
-                    $returnSelection[$map[$name]][1]
-                        = array_merge($returnSelection[$map[$name]][1], self::normalizeEntitySelection($targetReflection, $partialSelection));
+                $targetSelection = self::normalizeEntitySelection($targetReflection, $partialSelection);
+                if (isset($returnSelection['associated'][$name])) {
+                    $returnSelection['associated'][$name]
+                        = array_merge($returnSelection['associated'][$name], $targetSelection['entity']);
                 } else {
-                    $returnSelection[] = [$name, self::normalizeEntitySelection($targetReflection, $partialSelection)];
+                    $returnSelection['associated'][$name] = $targetSelection['entity'];
                 }
-                $map[$name] = count($returnSelection) - 1;
+            } else if ($partialSelection) {
+                $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                $targetSelection =  self::normalizeEntitySelection($targetReflection, $partialSelection);
+                if (isset($map[$name])) {
+                    $returnSelection['entity'][$map[$name]][1]
+                        = array_merge($returnSelection[$map[$name]][1], $targetSelection['entity']);
+                } else {
+                    $returnSelection['entity'][] = [$name, $targetSelection['entity']];
+                }
+                $map[$name] = count($returnSelection['entity']) - 1;
             } else if (!array_search($name, $returnSelection)) {
-                $returnSelection[] = $name;
+                $returnSelection['entity'][] = $name;
             }
         }
 
         return $returnSelection;
     }
 
-    public static function filterValues(Reflection $reflection, array $values, array $selection = []) {
-
+    public static function filterValues(Reflection $reflection, array $values, array $public = [], array $selection = []) {
 
         if (!$selection) {
-            return $values;
+            return array_merge($values, $public);
         }
 
         if (!$values) {
-            return $values;
+            return array_merge($values, $public);
         }
 
         $result = [];
@@ -160,31 +162,12 @@ class Selection
                 $index = $k;
             }
             if ($index !== false) {
-                if (is_array($selection[$index])) {
-                    $property = $reflection->getProperty($k);
-                    if ($property->getType() === \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION) {
-                        $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                        if ($v) {
-                            foreach ($v as $row) {
-                                $result[$k][] = is_array($row) 
-                                    ? self::filterValues($propertyTypeReflection, $row, $selection[$index])
-                                    : $row;
-                            }
-                        } else {
-                            $result[$k] = $v;
-                        }
-                    } else if ($property->getType() ===  \UniMapper\Entity\Reflection\Property::TYPE_ENTITY) {
-                        $propertyTypeReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                        $result[$k] = $v && !$v instanceof \UniMapper\Entity ? self::filterValues($propertyTypeReflection, $v, $selection[$index]) : $v;
-                    } else {
-                        $result[$k] = $v;
-                    }
-                } else {
-                    $result[$k] = $v;
-                }
+                $result[$k] = $v;
             }
         }
-        return $result;
+
+        // public properties values are already checked
+        return array_merge($result, $public);
     }
 
     public static function validateInputSelection(Reflection $reflection, array $selection)
@@ -243,25 +226,13 @@ class Selection
         $selection = self::normalizeEntitySelection($reflection, $selection);
 
         //- unmap selection for adapter
-        $selection = $mapper->unmapSelection(
+        $selectionUnmapped = $mapper->unmapSelection(
             $reflection,
             $selection,
-            $associations ? $associations['local'] : []
+            $associations
         );
 
-        if ($associations) {
-            // Add required keys from remote associations (must be after unmapping because ref key is unmapped)
-            foreach ($associations['remote'] as $association) {
-
-                if (($association instanceof \UniMapper\Association\ManyToOne || $association instanceof \UniMapper\Association\OneToOne)
-                    && !in_array($association->getReferencingKey(), $selection, true)
-                ) {
-                    $selection[$association->getReferencingKey()] = $association->getReferencingKey();
-                }
-            }
-        }
-
-        return $selection;
+        return $selectionUnmapped;
     }
 
     /**

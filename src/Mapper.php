@@ -355,39 +355,111 @@ class Mapper
     /**
      * Unmap entity property selection
      *
-     * @param \UniMapper\Entity\Reflection $reflection Entity reflection
-     * @param array                        $selection  Selection
+     * @param \UniMapper\Entity\Reflection $reflection   Entity reflection
+     * @param array                        $selection    Normalized selection
+     * @param array                        $associations Associations definitions
      *
      * @return array
      */
     public function unmapSelection(Reflection $reflection, array $selection, array $associations = []){
-        $selection = $this->traverseSelectionForUnmap($reflection, $selection);
+        $unampped = $this->traverseSelectionForUnmap($reflection, $selection['entity']);
+        $this->unmapSelectionAssociations($selection, $unampped, $associations);
 
         if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
-            $selection = $this->adapterMappings[$reflection->getAdapterName()]
-                ->unmapSelection($reflection, $selection, $associations, $this);
+            $unampped = $this->adapterMappings[$reflection->getAdapterName()]
+                ->unmapSelection($reflection, $unampped, $associations, $this);
         }
 
-        return $selection;
+        return $unampped;
     }
 
+    /**
+     * Traverse selection and unmap it
+     *
+     * @param \UniMapper\Entity\Reflection $reflection Entity reflection
+     * @param array                        $selection  Normalized entity selection
+     *
+     * @return array
+     */
     protected function traverseSelectionForUnmap(Reflection $reflection, array $selection){
         $unampped = [];
         foreach ($selection as $name) {
             if (is_array($name)) {
                 $property = $reflection->getProperty($name[0]);
-                $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                if (isset($unampped[$property->getName()])) {
-                    $unampped[$property->getName()][$property->getName(true)] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
-                } else {
-                    $unampped[$property->getName()] = [$property->getName(true) => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
+                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)) {
+                    $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                    if (isset($unampped[$property->getName()])) {
+                        $unampped[$property->getName()][$property->getName(true)] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
+                    } else {
+                        $unampped[$property->getName()] = [$property->getName(true) => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
+                    }
                 }
             } else {
                 $property = $reflection->getProperty($name);
-                $unampped[$property->getName()] = $property->getName(true);
+                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)) {
+                    $unampped[$property->getName()] = $property->getName(true);
+                }
             }
         }
 
         return $unampped;
+    }
+
+    /**
+     * Unmap associations selection
+     *
+     * - set's association target selection unmapped
+     * - add required fields to target selection (referenced key, target primary)
+     * - add required fields (if any) to unmapped entity selection (referencing key)
+     *
+     * @param array $selection         Normalized selection
+     * @param array $selectionUnmapped Unmapped entity selection
+     * @param array $associations      Associations definition
+     */
+    protected function unmapSelectionAssociations(array $selection, array &$selectionUnmapped, array $associations = [])
+    {
+        if ($associations) {
+            /** @var \UniMapper\Association $association */
+            foreach (array_merge($associations['local'], $associations['remote']) as $association) {
+
+                // Add required keys from remote associations (must be after unmapping because ref key is unmapped)
+                if ($association->isRemote()
+                    && ($association instanceof \UniMapper\Association\ManyToOne || $association instanceof \UniMapper\Association\OneToOne)
+                    && !in_array($association->getReferencingKey(), $selectionUnmapped, true)
+                ) {
+                    $selectionUnmapped[$association->getReferencingKey()] = $association->getReferencingKey();
+                }
+
+                if (isset($selection['associated'][$association->getPropertyName()])) {
+
+                    $associationSelectionUnmapped = $this->unmapSelection(
+                        $association->getTargetReflection(),
+                        ['entity' => $selection['associated'][$association->getPropertyName()]],
+                        []
+                    );
+
+                    // Remote required keys on target selection
+                    if ($association->isRemote()) {
+                        $key = null;
+                        if ($association instanceof \UniMapper\Association\OneToMany) {
+                            $key = $association->getReferencedKey();
+                        } else if ($association instanceof \UniMapper\Association\ManyToMany) {
+                            $key = $association->getTargetPrimaryKey();
+                        } else if ($association instanceof \UniMapper\Association\ManyToOne) {
+                            $key = $association->getTargetPrimaryKey();
+                        } else if ($association instanceof \UniMapper\Association\OneToOne) {
+                            $key = $association->getTargetPrimaryKey();
+                        }
+
+                        if ($key && in_array($key, $associationSelectionUnmapped) === false) {
+                            $associationSelectionUnmapped[] = $key;
+                        }
+                    }
+
+                    // done
+                    $association->setTargetSelectionUnampped($associationSelectionUnmapped);
+                }
+            }
+        }
     }
 }

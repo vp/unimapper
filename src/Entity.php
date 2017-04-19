@@ -37,13 +37,32 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     public function setSelection($selection)
     {
         $this->selection = $selection;
+
+        if ($selection) {
+            foreach ($selection as $k => $v) {
+                if (is_array($v)
+                    && $this->getReflection()->hasProperty($k)
+                    && isset($this->{$k})
+                    && in_array($this->getReflection()->getProperty($k)->getType(), [\UniMapper\Entity\Reflection\Property::TYPE_ENTITY, \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION])
+                ) {
+                   $this->{$k}->setSelection($v);
+                }
+            }
+        }
     }
 
     /**
      * @return array
      */
-    public function getSelection()
+    public function getSelection($property = null)
     {
+        if ($property) {
+            if (isset($this->selection[$property])) {
+                return $this->selection[$property];
+            } else {
+                return [];
+            }
+        }
         return $this->selection;
     }
 
@@ -216,7 +235,8 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
         return serialize(
             \UniMapper\Entity\Selection::filterValues(
                 Entity\Reflection::load(get_called_class()),
-                array_merge($this->data, $this->_getPublicPropertyValues()),
+                $this->data,
+                $this->_getPublicPropertyValues(),
                 $this->getSelection()
             )
         );
@@ -449,6 +469,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
             if (($value instanceof Entity\Collection || $value instanceof Entity)
                 && $nesting
             ) {
+                $value->setSelection($this->getSelection($propertyName));
                 $output[$propertyName] = $value->toArray($nesting);
             } else {
                 $output[$propertyName] = $value;
@@ -457,8 +478,9 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
 
         return \UniMapper\Entity\Selection::filterValues(
             $reflection,
-                array_merge($output, $this->_getPublicPropertyValues()),
-                $this->getSelection()
+            $output,
+            $this->_getPublicPropertyValues(),
+            $this->getSelection()
         );
     }
 
@@ -486,6 +508,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
 
                 $value = $this->{$propertyName};
                 if ($value instanceof Entity\Collection || $value instanceof Entity) {
+                    $value->setSelection($this->getSelection($propertyName));
                     $output[$propertyName] = $value->jsonSerialize();
                 } elseif ($value instanceof \DateTime
                     && $property->getType() === Entity\Reflection\Property::TYPE_DATE
@@ -500,7 +523,8 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
 
         return \UniMapper\Entity\Selection::filterValues(
             $reflection,
-            array_merge($output, $this->_getPublicPropertyValues()),
+            $output,
+            $this->_getPublicPropertyValues(),
             $this->getSelection()
         );
     }

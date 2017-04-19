@@ -76,16 +76,10 @@ class SelectOne extends \UniMapper\Query
 
                 $assocValue = $result[$association->getKey()];
 
-                $associationSelection = Selection::createAdapterSelection(
-                    $connection->getMapper(),
-                    $association->getTargetReflection(),
-                    $selection[$association->getPropertyName()]
-                );
-
                 $associated = $association->load(
                     $connection,
                     [$assocValue],
-                    $associationSelection
+                    $association->getTargetSelectionUnampped()
                 );
 
                 // Merge returned associations
