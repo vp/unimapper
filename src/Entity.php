@@ -36,13 +36,32 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
     public function setSelection($selection)
     {
         $this->selection = $selection;
+
+        if ($selection) {
+            foreach ($selection as $k => $v) {
+                if (is_array($v)
+                    && $this->getReflection()->hasProperty($k)
+                    && isset($this->{$k})
+                    && in_array($this->getReflection()->getProperty($k)->getType(), [\UniMapper\Entity\Reflection\Property::TYPE_ENTITY, \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION])
+                ) {
+                   $this->{$k}->setSelection($v);
+                }
+            }
+        }
     }
 
     /**
      * @return array
      */
-    public function getSelection()
+    public function getSelection($property = null)
     {
+        if ($property) {
+            if (isset($this->selection[$property])) {
+                return $this->selection[$property];
+            } else {
+                return [];
+            }
+        }
         return $this->selection;
     }
 
@@ -426,6 +445,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
             if (($value instanceof Entity\Collection || $value instanceof Entity)
                 && $nesting
             ) {
+                $value->setSelection($this->getSelection($propertyName));
                 $output[$propertyName] = $value->toArray($nesting);
             } else {
                 $output[$propertyName] = $value;
@@ -451,6 +471,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
 
             $value = $this->{$propertyName};
             if ($value instanceof Entity\Collection || $value instanceof Entity) {
+                $value->setSelection($this->getSelection($propertyName));
                 $output[$propertyName] = $value->jsonSerialize();
             } elseif ($value instanceof \DateTime
                 && $property->getType() === Entity\Reflection\Property::TYPE_DATE

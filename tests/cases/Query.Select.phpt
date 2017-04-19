@@ -55,7 +55,7 @@ class QuerySelectTest extends TestCase
             ->andReturn($this->fooAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ["text" => "text_unmapped", "id" => "fooId"], [], null, null)
+            ->with("fooResource", ["text" => "fooText", "id" => "fooId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
@@ -95,7 +95,7 @@ class QuerySelectTest extends TestCase
         $this->fooAdapterMock->shouldReceive("createSelect")
             ->with(
                 "fooResource",
-                ["id"=>"fooId"],
+                ["id"=>"fooId", "adapterAssociation" => ["id"=>"fooId", "text" => "fooText"]],
                 [],
                 null,
                 null
@@ -160,7 +160,7 @@ class QuerySelectTest extends TestCase
             ->with(["barId" => [\UniMapper\Entity\Filter::EQUAL => [3, 4]]])
             ->once();
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("barResource", ["id" => "barId"])
+            ->with("barResource", ["id" => "barId", "text" => "barText"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->barAdapterMock->shouldReceive("onExecute")
@@ -280,7 +280,7 @@ class QuerySelectTest extends TestCase
             ->andReturn(new UniMapper\Mapper);
 
         $this->fooAdapterMock->shouldReceive("createSelect")
-            ->with("fooResource", ['id'=>'fooId', 'text'=>'text_unmapped'], [], null, null)
+            ->with("fooResource", ['id'=>'fooId', 'text'=>'fooText'], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
@@ -306,8 +306,12 @@ class QuerySelectTest extends TestCase
             ->with(
                 "fooResource",
                 [
-                    'text'=>'text_unmapped',
-                    'id'=>'fooId'
+                    'text'=>'fooText',
+                    'id'=>'fooId',
+                    'adapterAssociation' => [
+                        'text'=>'fooText',
+                        'id'=>'fooId'
+                    ]
                 ],
                 [],
                 null,
@@ -321,7 +325,7 @@ class QuerySelectTest extends TestCase
             ->once();
 
         $this->adapterQueryMock->shouldReceive("setFilter")
-            ->with(["text_unmapped" => [\UniMapper\Entity\Filter::EQUAL => "foo"]])
+            ->with(["fooText" => [\UniMapper\Entity\Filter::EQUAL => "foo"]])
             ->once();
         $this->adapterQueryMock->shouldReceive("setAssociations")
             ->with(
@@ -349,7 +353,7 @@ class QuerySelectTest extends TestCase
  * @adapter FooAdapter(fooResource)
  *
  * @property int    $id                 m:primary m:map-by(fooId)
- * @property string $text               m:map-by(text_unmapped)
+ * @property string $text               m:map-by(fooText)
  * @property Foo[]  $adapterAssociation m:assoc(type)
  * @property Bar[]  $manyToMany         m:assoc(M:N) m:assoc-by(foo_fooId|foo_bar|bar_barId)
  */
@@ -358,7 +362,8 @@ class Foo extends \UniMapper\Entity {}
 /**
  * @adapter BarAdapter(barResource)
  *
- * @property int $id m:primary m:map-by(barId)
+ * @property int    $id                 m:primary m:map-by(barId)
+ * @property string $text               m:map-by(barText)
  */
 class Bar extends \UniMapper\Entity {}
 

@@ -45,6 +45,7 @@ class SelectOne extends \UniMapper\Query
         $mapper = $connection->getMapper();
         $primaryProperty = $this->reflection->getPrimaryProperty();
         $selection = $this->createQuerySelection();
+        $remoteAssociations = $this->createRemoteAssociations();
 
         $query = $adapter->createSelectOne(
             $this->reflection->getAdapterResource(),
@@ -53,7 +54,7 @@ class SelectOne extends \UniMapper\Query
                 $primaryProperty,
                 $this->primaryValue
             ),
-            Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions)
+            Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations)
         );
 
         $adapterAssociations = $this->getAdapterAssociations();
@@ -68,7 +69,6 @@ class SelectOne extends \UniMapper\Query
         }
 
         // Create remote associations
-        $remoteAssociations = $this->createRemoteAssociations();
         if ($remoteAssociations) {
 
             settype($result, "array");

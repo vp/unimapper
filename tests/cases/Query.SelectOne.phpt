@@ -43,7 +43,7 @@ class QuerySelectOneTest extends TestCase
             ->andReturn($this->fooAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
+            ->with("fooResource", "fooId", 1, ["id" => "fooId", "text" => "fooText"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -73,7 +73,7 @@ class QuerySelectOneTest extends TestCase
             ->once();
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
+            ->with("fooResource", "fooId", 1, ["id" => "fooId", "text" => "fooText", "adapterAssociation" => ["id" => "fooId", "text" => "fooText"]])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -103,7 +103,7 @@ class QuerySelectOneTest extends TestCase
             ->andReturn($this->barAdapterMock);
 
         $this->fooAdapterMock->shouldReceive("createSelectOne")
-            ->with("fooResource", "fooId", 1, ["id" => "fooId"])
+            ->with("fooResource", "fooId", 1, ["id" => "fooId", "text" => "fooText"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->fooAdapterMock->shouldReceive("onExecute")
@@ -129,7 +129,7 @@ class QuerySelectOneTest extends TestCase
             );
 
         $this->barAdapterMock->shouldReceive("createSelect")
-            ->with("barResource", ["id" => "barId"])
+            ->with("barResource", ["id" => "barId", "text" => "barText"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapterQueryMock->shouldReceive("setFilter")
@@ -160,16 +160,18 @@ class QuerySelectOneTest extends TestCase
 /**
  * @adapter FooAdapter(fooResource)
  *
- * @property int   $id                 m:primary m:map-by(fooId)
- * @property Foo[] $adapterAssociation m:assoc(type)
- * @property Bar[] $manyToMany         m:assoc(M:N) m:assoc-by(foo_fooId|foo_bar|bar_barId)
+ * @property int    $id                 m:primary m:map-by(fooId)
+ * @property string $text               m:map-by(fooText)
+ * @property Foo[]  $adapterAssociation m:assoc(type)
+ * @property Bar[]  $manyToMany         m:assoc(M:N) m:assoc-by(foo_fooId|foo_bar|bar_barId)
  */
 class Foo extends \UniMapper\Entity {}
 
 /**
  * @adapter BarAdapter(barResource)
  *
- * @property int $id m:primary m:map-by(barId)
+ * @property int    $id   m:primary m:map-by(barId)
+ * @property string $text m:map-by(barText)
  */
 class Bar extends \UniMapper\Entity {}
 

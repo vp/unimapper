@@ -60,7 +60,7 @@ class Select extends \UniMapper\Query
 
         $query = $adapter->createSelect(
             $this->reflection->getAdapterResource(),
-            \UniMapper\Entity\Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions),
+            \UniMapper\Entity\Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations),
             $this->orderBy,
             $this->limit,
             $this->offset

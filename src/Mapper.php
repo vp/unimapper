@@ -382,40 +382,99 @@ class Mapper
     /**
      * Unmap entity property selection
      *
-     * @param \UniMapper\Entity\Reflection $reflection   Entity reflection
-     * @param array                        $selection    Selection
-     * @param array                        $associations Local associations
+     * @param \UniMapper\Entity\Reflection                         $reflection         Entity reflection
+     * @param array                                                $selection          Normalized selection
+     * @param \UniMapper\Entity\Reflection\Property\Option\Assoc[] $associations       Associations definitions
+     * @param \UniMapper\Association[]                             $remoteAssociations Remote associations instances
      *
      * @return array
      */
-    public function unmapSelection(Reflection $reflection, array $selection, array $associations = []){
-        $selection = $this->traverseSelectionForUnmap($reflection, $selection);
+    public function unmapSelection(Reflection $reflection, array $selection, array $associations = [], array $remoteAssociations = []){
+        $unampped = $this->traverseSelectionForUnmap($reflection, $selection['entity']);
+        $this->unmapSelectionAssociations($selection, $unampped, $associations, $remoteAssociations);
 
         if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
-            $selection = $this->adapterMappings[$reflection->getAdapterName()]
-                ->unmapSelection($reflection, $selection, $associations, $this);
-        }
-
-        return $selection;
-    }
-
-    protected function traverseSelectionForUnmap(Reflection $reflection, array $selection){
-        $unampped = [];
-        foreach ($selection as $name) {
-            if (is_array($name)) {
-                $property = $reflection->getProperty($name[0]);
-                $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
-                if (isset($unampped[$property->getName()])) {
-                    $unampped[$property->getName()][$property->getUnmapped()] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
-                } else {
-                    $unampped[$property->getName()] = [$property->getUnmapped() => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
-                }
-            } else {
-                $property = $reflection->getProperty($name);
-                $unampped[$property->getName()] = $property->getUnmapped();
-            }
+            $unampped = $this->adapterMappings[$reflection->getAdapterName()]
+                ->unmapSelection($reflection, $unampped, $associations, $this);
         }
 
         return $unampped;
+    }
+
+    /**
+     * Traverse selection and unmap it
+     *
+     * @param \UniMapper\Entity\Reflection $reflection Entity reflection
+     * @param array                        $selection  Normalized entity selection
+     *
+     * @return array
+     */
+    protected function traverseSelectionForUnmap(Reflection $reflection, array $selection){
+        $unmapped = [];
+        foreach ($selection as $name) {
+            $property = $reflection->getProperty(is_array($name) ? $name[0] : $name);
+            $dontMap = $property->hasOption(Reflection\Property\Option\Map::KEY)
+                && $property->getOption(Reflection\Property\Option\Map::KEY) === false;
+            if (is_array($name)) {
+                if (!$dontMap) {
+                    $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
+                    if (isset($unmapped[$property->getName()])) {
+                        $unmapped[$property->getName()][$property->getUnmapped()] = array_merge($unmapped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
+                    } else {
+                        $unmapped[$property->getName()] = [$property->getUnmapped() => $this->traverseSelectionForUnmap($targetReflection, $name[1])];
+                    }
+                }
+            } else {
+                if (!$dontMap) {
+                    $unmapped[$property->getName()] = $property->getUnmapped();
+                }
+            }
+        }
+
+        return $unmapped;
+    }
+
+    /**
+     * Unmap associations selection
+     *
+     * - set's association target selection unmapped
+     * - add required fields to target selection (referenced key, target primary)
+     * - add required fields (if any) to unmapped entity selection (referencing key)
+     *
+     * @param array                                                $selection          Normalized selection
+     * @param array                                                $selectionUnmapped  Unmapped entity selection
+     * @param \UniMapper\Entity\Reflection\Property\Option\Assoc[] $associations       All associations definitions
+     * @param \UniMapper\Association[]                             $remoteAssociations Remote associations instances
+     */
+    protected function unmapSelectionAssociations(array $selection, array &$selectionUnmapped, array $associations = [], array $remoteAssociations = [])
+    {
+        if ($associations) {
+            /** @var \UniMapper\Association $association */
+            foreach ($associations as $propertyName => $option) {
+
+                // Add required keys from remote associations (must be after unmapping because ref key is unmapped)
+                if ($option->isRemote()) {
+                    $association = $remoteAssociations[$propertyName];
+                    if (($association instanceof \UniMapper\Association\ManyToOne || $association instanceof \UniMapper\Association\OneToOne)
+                        && !in_array($association->getKey(), $selectionUnmapped, true)
+                    ) {
+                        $selectionUnmapped[$association->getKey()] = $association->getKey();
+                    }
+                }
+
+                if (isset($selection['associated'][$propertyName])) {
+                    // Leave only adapter association selection
+                    if (!$option->isRemote()) {
+                        $selectionUnmapped[$propertyName] = $this->unmapSelection(
+                            $option->getTargetReflection(),
+                            ['entity' => $selection['associated'][$propertyName]],
+                            []
+                        );
+                    } else {
+                        unset($selectionUnmapped[$propertyName]);
+                    }
+                }
+            }
+        }
     }
 }
