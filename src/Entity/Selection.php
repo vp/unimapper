@@ -117,8 +117,14 @@ class Selection
             }
 
             $property = $entityReflection->getProperty($name);
-            if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
-            ) {
+            $isEntityOrCollection = in_array($property->getType(), [\UniMapper\Entity\Reflection\Property::TYPE_ENTITY, \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION]) === true;
+
+            if ($isEntityOrCollection
+                && !$property->hasOption(Reflection\Property::OPTION_ASSOC)
+                && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
+                && $property->hasOption(Reflection\Property::OPTION_MAP_FILTER)) {
+                $returnSelection['entity'][] = $name;
+            } else if ($property->hasOption(Reflection\Property::OPTION_ASSOC)) {
                 $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
                 $targetSelection = self::normalizeEntitySelection($targetReflection, $partialSelection);
                 if (isset($returnSelection['associated'][$name])) {
@@ -162,6 +168,9 @@ class Selection
                 $index = $k;
             }
             if ($index !== false) {
+                $result[$k] = $v;
+            } else if ($v && $reflection->getProperty($k)->hasOption(\UniMapper\Entity\Reflection\Property::OPTION_COMPUTED)) {
+                // computed with value
                 $result[$k] = $v;
             }
         }
