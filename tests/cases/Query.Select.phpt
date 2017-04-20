@@ -595,7 +595,7 @@ class QuerySelectTest extends \Tester\TestCase
             ->andReturn([['simplePrimaryId' => 100], ['simplePrimaryId' => 101], ['simplePrimaryId' => 102]]);
 
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelect")
-            ->with("remote_resource", ['id'=>'id','text'=>'text'], [], null, null)
+            ->with("remote_resource", ['id'=>'id','text'=>'text', 0 => "simplePrimaryId"], [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
