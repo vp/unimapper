@@ -167,4 +167,21 @@ trait Selectable
         return $this->querySelection;
     }
 
+    /**
+     * Create adapter selection
+     *
+     * @param \UniMapper\Mapper $mapper Mapper instance
+     *
+     * @return array Unmapped selection for adapter query
+     */
+    protected function createAdapterSelection(\UniMapper\Mapper $mapper)
+    {
+        return \UniMapper\Entity\Selection::createAdapterSelection(
+            $mapper,
+            $this->entityReflection,
+            $this->getQuerySelection(),
+            $this->associations
+        );
+    }
+
 }
