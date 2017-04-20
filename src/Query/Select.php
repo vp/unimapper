@@ -24,7 +24,7 @@ class Select extends \UniMapper\Query
     public function __construct(Reflection $reflection)
     {
         parent::__construct($reflection);
-        $this->select(array_slice(func_get_args(), 3));
+        $this->select(array_slice(func_get_args(), 1));
     }
 
     public function cached($enable = true, array $options = [])

@@ -36,7 +36,7 @@ class SelectOne extends \UniMapper\Query
         $this->primaryValue = $primaryValue;
 
         // Selection
-        $this->select(array_slice(func_get_args(), 3));
+        $this->select(array_slice(func_get_args(), 2));
     }
 
     protected function onExecute(\UniMapper\Connection $connection)
