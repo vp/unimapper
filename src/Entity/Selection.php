@@ -118,7 +118,23 @@ class Selection
             }
 
             $property = $entityReflection->getProperty($name);
-            if ($property->hasOption(Reflection\Property\Option\Assoc::KEY)
+            $isEntityOrCollection = in_array(
+                $property->getType(),
+                [
+                    \UniMapper\Entity\Reflection\Property::TYPE_ENTITY,
+                    \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION
+                ]
+                ) === true;
+
+            if ($isEntityOrCollection
+                && !$property->hasOption(Reflection\Property\Option\Assoc::KEY)
+                && !$property->hasOption(Reflection\Property\Option\Computed::KEY)
+                && ($property->hasOption(Reflection\Property\Option\Map::KEY)
+                    && $property->getOption(Reflection\Property\Option\Map::KEY)->getFilterIn()
+                )
+            ) {
+                $returnSelection['entity'][] = $name;
+            } else if ($property->hasOption(Reflection\Property\Option\Assoc::KEY)
             ) {
                 $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
                 $targetSelection = self::normalizeEntitySelection($targetReflection, $partialSelection);
@@ -163,6 +179,9 @@ class Selection
                 $index = $k;
             }
             if ($index !== false) {
+                $result[$k] = $v;
+            } else if ($v && $reflection->getProperty($k)->hasOption(\UniMapper\Entity\Reflection\Property\Option\Computed::KEY)) {
+                // computed with value
                 $result[$k] = $v;
             }
         }
