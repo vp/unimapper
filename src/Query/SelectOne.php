@@ -54,7 +54,7 @@ class SelectOne extends \UniMapper\Query
                 $primaryProperty,
                 $this->primaryValue
             ),
-            Selection::createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations)
+            $this->createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations)
         );
 
         $adapterAssociations = $this->getAdapterAssociations();
@@ -79,7 +79,7 @@ class SelectOne extends \UniMapper\Query
 
                 $definition = $this->assocDefinitions[$colName];
 
-                $associationSelection = Selection::createAdapterSelection(
+                $associationSelection = $this->createAdapterSelection(
                     $mapper,
                     $definition->getTargetReflection(),
                     $selection[$colName]

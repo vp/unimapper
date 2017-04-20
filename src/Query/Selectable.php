@@ -189,4 +189,26 @@ trait Selectable
         return $selection;
     }
 
+    /**
+     * Create's unmapped selection for adapter query
+     *
+     * @param \UniMapper\Mapper                                    $mapper             Mapper instance
+     * @param \UniMapper\Entity\Reflection                         $reflection         Target entity reflection
+     * @param array                                                $selection          Query selection
+     * @param \UniMapper\Entity\Reflection\Property\Option\Assoc[] $associations       All associations definitions
+     * @param \UniMapper\Association[]                             $remoteAssociations Remote associations instances
+     *
+     * @return array Unmapped selection for adapter query
+     */
+    public static function createAdapterSelection(\UniMapper\Mapper $mapper, Reflection $reflection, array $selection = [], array $associations = [], array $remoteAssociations = [])
+    {
+        return \UniMapper\Entity\Selection::createAdapterSelection(
+            $mapper,
+            $reflection,
+            $selection,
+            $associations,
+            $remoteAssociations
+        );
+    }
+
 }
