@@ -386,7 +386,8 @@ class Mapper
         foreach ($selection as $name) {
             if (is_array($name)) {
                 $property = $reflection->getProperty($name[0]);
-                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)) {
+                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)
+                    && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
                     if (isset($unampped[$property->getName()])) {
                         $unampped[$property->getName()][$property->getName(true)] = array_merge($unampped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
@@ -396,7 +397,8 @@ class Mapper
                 }
             } else {
                 $property = $reflection->getProperty($name);
-                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)) {
+                if (!$property->hasOption(Reflection\Property::OPTION_NOT_MAP)
+                    && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)) {
                     $unampped[$property->getName()] = $property->getName(true);
                 }
             }
