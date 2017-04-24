@@ -459,6 +459,17 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
         );
     }
 
+    private function _getPublicPropertyValues()
+    {
+        $result = [];
+        foreach (Entity\Reflection::load(get_called_class())->getPublicProperties() as $name) {
+            if (isset($this->{$name})) {
+                $result[$name] = $this->{$name};
+            }
+        }
+        return $result;
+    }
+
     /**
      * Gets data which should be serialized to JSON
      *
