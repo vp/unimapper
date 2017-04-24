@@ -43,7 +43,13 @@ class Selection
                 } else {
                     $selection[] = $property->getName();
                 }
+            } else if ($property->hasOption(Reflection\Property::OPTION_COMPUTED)) {
+                $selection[] = $property->getName();
             }
+        }
+
+        foreach ($entityReflection->getPublicProperties() as $publicProperty) {
+            $selection[] = $publicProperty;
         }
 
         array_pop($nesting);
@@ -100,6 +106,7 @@ class Selection
     {
         $returnSelection = ['entity' => [], 'associated' => []];
         $map = [];
+        $publicProperties = $entityReflection->getPublicProperties();
         foreach ($selection as $index => $name) {
 
             if (is_array($name)) {
@@ -107,6 +114,10 @@ class Selection
                 $name = $index;
             } else {
                 $partialSelection = null;
+            }
+
+            if (in_array($name, $publicProperties) === true) {
+                continue;
             }
 
             if (!$entityReflection->hasProperty($name)) {
@@ -171,6 +182,19 @@ class Selection
                 $result[$k] = $v;
             } else if ($v && $reflection->getProperty($k)->hasOption(\UniMapper\Entity\Reflection\Property::OPTION_COMPUTED)) {
                 // computed with value
+                $result[$k] = $v;
+            }
+        }
+
+        foreach ($public as $k => $v) {
+            $index = array_search($k, $selection);
+            if ($index === false && isset($selection[$k])) {
+                $index = $k;
+            }
+            if ($index !== false) {
+                $result[$k] = $v;
+            } else if ($v) {
+                // was set
                 $result[$k] = $v;
             }
         }

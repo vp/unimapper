@@ -488,9 +488,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \Iterator
     {
         $result = [];
         foreach (Entity\Reflection::load(get_called_class())->getPublicProperties() as $name) {
-            if (isset($this->{$name})) {
-                $result[$name] = $this->{$name};
-            }
+            $result[$name] = $this->{$name};
         }
         return $result;
     }
