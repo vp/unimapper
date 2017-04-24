@@ -413,10 +413,10 @@ class Mapper
         $unmapped = [];
         foreach ($selection as $name) {
             $property = $reflection->getProperty(is_array($name) ? $name[0] : $name);
-            $dontMap = $property->hasOption(Reflection\Property\Option\Map::KEY)
-                && $property->getOption(Reflection\Property\Option\Map::KEY) === false;
+            $dontMap = ($property->hasOption(Reflection\Property\Option\Map::KEY)
+                && $property->getOption(Reflection\Property\Option\Map::KEY) === false);
             if (is_array($name)) {
-                if (!$dontMap) {
+                if (!$dontMap && !$property->hasOption(Reflection\Property\Option\Computed::KEY)) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
                     if (isset($unmapped[$property->getName()])) {
                         $unmapped[$property->getName()][$property->getUnmapped()] = array_merge($unmapped[$property->getName()], $this->traverseSelectionForUnmap($targetReflection, $name[1]));
@@ -425,7 +425,7 @@ class Mapper
                     }
                 }
             } else {
-                if (!$dontMap) {
+                if (!$dontMap && !$property->hasOption(Reflection\Property\Option\Computed::KEY)) {
                     $unmapped[$property->getName()] = $property->getUnmapped();
                 }
             }
