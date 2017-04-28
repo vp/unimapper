@@ -174,7 +174,7 @@ trait Selectable
      *
      * @return array Unmapped selection for adapter query
      */
-    protected function createAdapterSelection(\UniMapper\Mapper $mapper)
+    public function createAdapterSelection(\UniMapper\Mapper $mapper)
     {
         return \UniMapper\Entity\Selection::createAdapterSelection(
             $mapper,
