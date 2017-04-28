@@ -274,28 +274,12 @@ class Selection
      */
     public static function mergeArrays($arr1, $arr2)
     {
-        $arrays = func_get_args();
-        $result = array();
-
-        foreach ($arrays as $array) {
-            foreach ($array as $key => $value) {
-                // Renumber integer keys as array_merge_recursive() does. Note that PHP
-                // automatically converts array keys that are integer strings (e.g., '1')
-                // to integers.
-                if (is_integer($key)) {
-                    $result[] = $value;
-                }
-                // Recurse when both values are arrays.
-                elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value)) {
-                    $result[$key] = self::mergeArrays($result[$key], $value);
-                }
-                // Otherwise, use the latter value, overriding any previous value.
-                else {
-                    $result[$key] = $value;
-                }
+        $res = $arr1 + $arr2;
+        foreach (array_intersect_key($arr1, $arr2) as $k => $v) {
+            if (is_array($v) && is_array($arr2[$k])) {
+                $res[$k] = self::mergeArrays($v, $arr2[$k]);
             }
         }
-
-        return $result;
+        return $res;
     }
 }
