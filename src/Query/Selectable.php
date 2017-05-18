@@ -105,6 +105,9 @@ trait Selectable
             if (!is_array($args)) {
                 $args = [$args];
             }
+            if (count($args) === 1 && isset($args[0]) && is_array($args[0])) {
+                $args = $args[0];
+            }
             $this->selection = $args;
         } else {
             $this->selection = [];
@@ -114,7 +117,6 @@ trait Selectable
 
         return $this;
     }
-
     /**
      * Return's final query selection
      *
