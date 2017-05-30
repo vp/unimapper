@@ -488,12 +488,14 @@ class QuerySelectTest extends \Tester\TestCase
                         'email',
                         'time',
                         'date',
+                        'year',
                         'ip',
                         'mark',
-                        'entity' => ['id', 'text'], // Todo: should or not select automatically select this Nested?
+                        'entity' => ['id', 'text', 'publicProperty'], // Todo: should or not select automatically select this Nested?
                         'readonly',
                         'storedData',
                         'enumeration',
+                        'publicProperty',
                     ]
                 ]
             ],
@@ -535,6 +537,64 @@ class QuerySelectTest extends \Tester\TestCase
                             ],
                     ],
             ], [], null, null)
+            ->once()
+            ->andReturn($this->adapterQueryMock);
+
+        $this->adapters["FooAdapter"]->shouldReceive("onExecute")
+            ->with($this->adapterQueryMock)
+            ->once()
+            ->andReturn(false);
+
+        $query->run($this->connectionMock);
+    }
+
+    public function testSelectNestedWithSpecificSelection()
+    {
+        $this->connectionMock->shouldReceive("getMapper")->once()->andReturn(new UniMapper\Mapper);
+        $this->connectionMock->shouldReceive("getAdapter")->once()->with("FooAdapter")->andReturn($this->adapters["FooAdapter"]);
+
+        $query = $this->createQuery()->select(["id", "entity" => ["id","entity" => ['id', 'text', 'empty', 'entity' => ['id']]]]);
+        Assert::same(
+            [
+                'id',
+                'entity' => [
+                    'id',
+                    'entity' => ['id', 'text', 'empty', 'entity' => ['id']],
+                ],
+            ],
+            $query->getQuerySelection()
+        );
+
+        $this->adapters["FooAdapter"]->shouldReceive("createSelect")
+            ->with(
+                "simple_resource",
+                [
+                    'id' => 'simplePrimaryId',
+                    'entity' =>
+                        [
+                            'entity' =>
+                                [
+                                    'id' => 'id',
+                                    'entity' =>
+                                        [
+                                            'entity' =>
+                                                [
+                                                    'id' => 'simplePrimaryId',
+                                                    'text' => 'text',
+                                                    'empty' => 'empty',
+                                                    'entity' =>
+                                                        [
+                                                            'entity' =>
+                                                                [
+                                                                    'id' => 'id',
+                                                                ],
+                                                        ],
+                                                ],
+                                        ],
+                                ],
+                        ],
+                ],
+                [], null, null)
             ->once()
             ->andReturn($this->adapterQueryMock);
 
