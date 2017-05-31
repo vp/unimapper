@@ -73,7 +73,7 @@ class SelectOne extends \UniMapper\Query
             /** @var \UniMapper\Association $association */
             foreach ($this->associations["remote"] as $colName => $association) {
 
-                $assocValue = $result[$association->getKey()];
+                $assocValue = $result[$association->getReferencingKey()];
 
                 $associated = $association->load(
                     $connection,

@@ -34,6 +34,11 @@ class OneToMany extends Multi
         return $this->mapBy[0];
     }
 
+    public function getReferencingKey()
+    {
+        return $this->getPrimaryKey();
+    }
+
     public function load(Connection $connection, array $primaryValues, array $selection = [])
     {
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());

@@ -35,18 +35,12 @@ class ManyToOne extends Single
         }
     }
 
-    public function getKey()
-    {
-        return $this->getReferencingKey();
-    }
-
     public function getReferencingKey()
     {
         return $this->mapBy[0];
     }
 
-    public function getTargetPrimaryKey()
-    {
+    public function getReferencedKey() {
         return $this->targetReflection->getPrimaryProperty()->getName(true);
     }
 
@@ -64,7 +58,7 @@ class ManyToOne extends Single
 
         // Set target conditions
         $filter = $this->filter;
-        $filter[$this->getTargetPrimaryKey()][Entity\Filter::EQUAL] = $primaryValues;
+        $filter[$this->getReferencedKey()][Entity\Filter::EQUAL] = $primaryValues;
         if ($this->getTargetFilter()) {
             $filter = array_merge($connection->getMapper()->unmapFilter($this->getTargetReflection(), $this->getTargetFilter()), $filter);
         }
@@ -78,11 +72,18 @@ class ManyToOne extends Single
 
         return $this->groupResult(
             $result,
-            [$this->getTargetPrimaryKey()]
+            [$this->getReferencedKey()]
         );
     }
 
-    public function saveChanges($primaryValue, Connection $connection, Entity $entity)
+    /**
+     * @param string                $primaryValue
+     * @param \UniMapper\Connection $connection
+     * @param \UniMapper\Entity     $entity
+     *
+     * @throws \UniMapper\Exception\InvalidArgumentException
+     */
+    public function saveChanges($primaryValue, Connection $connection, $entity)
     {
         $reflection = Entity\Reflection::load($entity);
 

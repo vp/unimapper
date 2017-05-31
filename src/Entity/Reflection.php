@@ -215,7 +215,7 @@ class Reflection
                 $this->primaryName = $property->getName();
             }
 
-            if ($property->hasOption(Reflection\Property::OPTION_ASSOC) && $this->primaryName === null) {
+            if ($property->hasAssociation() && $this->primaryName === null) {
                 throw new Exception\EntityException(
                     "You must define primary property before the association!",
                     $this->className,

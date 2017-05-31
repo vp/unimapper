@@ -56,7 +56,7 @@ trait Selectable
                 }
 
                 $property = $this->entityReflection->getProperty($name);
-                if (!$property->hasOption(Reflection\Property::OPTION_ASSOC)) {
+                if (!$property->hasAssociation()) {
                     throw new Exception\QueryException(
                         "Property '" . $name . "' is not defined as association"
                         . " on entity " . $this->entityReflection->getClassName()
@@ -64,7 +64,7 @@ trait Selectable
                     );
                 }
 
-                $association = $property->getOption(Reflection\Property::OPTION_ASSOC);
+                $association = $property->getAssociation();
                 if ($selection) {
                     if (is_string($selection)) {
                         if (is_string($selection)) {

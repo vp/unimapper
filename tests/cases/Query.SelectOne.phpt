@@ -176,7 +176,7 @@ class QuerySelectOneTest extends \Tester\TestCase
         $this->connectionMock->shouldReceive("getAdapter")->once()->with("RemoteAdapter")->andReturn($this->adapters["RemoteAdapter"]);
 
         $this->adapters["RemoteAdapter"]->shouldReceive("createSelectOne")
-            ->with("remote_resource", "id", 1, ["text" => "text"])
+            ->with("remote_resource", "id", 1, ["text" => "text", "id" => "id"])
             ->once()
             ->andReturn($this->adapterQueryMock);
         $this->adapters["RemoteAdapter"]->shouldReceive("onExecute")

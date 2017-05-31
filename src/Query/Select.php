@@ -79,7 +79,7 @@ class Select extends \UniMapper\Query
             /** @var \UniMapper\Association $association */
             foreach ($this->associations["remote"] as $colName => $association) {
 
-                $assocKey = $association->getKey();
+                $assocKey = $association->getReferencingKey();
 
                 $assocValues = [];
                 foreach ($result as $item) {

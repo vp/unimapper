@@ -50,11 +50,29 @@ class ManyToMany extends Multi
         }
     }
 
-    public function getJoinKey()
-    {
+    /**
+     * Column on join resource with targeting source referencing key
+     *
+     * @return int|string
+     */
+    public function getJoinReferencingKey() {
         return $this->mapBy[0];
     }
 
+    /**
+     * Column on join resource with targeting target referenced key
+     *
+     * @return int|string
+     */
+    public function getJoinReferencedKey() {
+        return $this->mapBy[2];
+    }
+
+    /**
+     * Join resource name (join table name etc...)
+     *
+     * @return string
+     */
     public function getJoinResource()
     {
         return$this->mapBy[1];
@@ -62,11 +80,10 @@ class ManyToMany extends Multi
 
     public function getReferencingKey()
     {
-        return $this->mapBy[2];
+        return $this->getPrimaryKey();
     }
 
-    public function getTargetPrimaryKey()
-    {
+    public function getReferencedKey() {
         return $this->targetReflection->getPrimaryProperty()->getName(true);
     }
 
@@ -89,10 +106,10 @@ class ManyToMany extends Multi
 
         $joinQuery = $currentAdapter->createSelect(
             $this->getJoinResource(),
-            [$this->getJoinKey(), $this->getReferencingKey()]
+            [$this->getJoinReferencingKey(), $this->getJoinReferencedKey()]
         );
         $joinQuery->setFilter(
-            [$this->getJoinKey() => [Entity\Filter::EQUAL => $primaryValues]]
+            [$this->getJoinReferencingKey() => [Entity\Filter::EQUAL => $primaryValues]]
         );
 
         $joinResult = $currentAdapter->execute($joinQuery);
@@ -104,8 +121,8 @@ class ManyToMany extends Multi
         $joinResult = $this->groupResult(
             $joinResult,
             [
-                $this->getReferencingKey(),
-                $this->getJoinKey()
+                $this->getJoinReferencedKey(),
+                $this->getJoinReferencingKey()
             ]
         );
 
@@ -119,7 +136,7 @@ class ManyToMany extends Multi
 
         // Set target conditions
         $filter = $this->filter;
-        $filter[$this->getTargetPrimaryKey()][Entity\Filter::EQUAL] = array_keys($joinResult);
+        $filter[$this->getReferencedKey()][Entity\Filter::EQUAL] = array_keys($joinResult);
         if ($this->getTargetFilter()) {
             $filter = array_merge($connection->getMapper()->unmapFilter($this->getTargetReflection(), $this->getTargetFilter()), $filter);
         }
@@ -132,7 +149,7 @@ class ManyToMany extends Multi
 
         $targetResult = $this->groupResult(
             $targetResult,
-            [$this->getTargetPrimaryKey()]
+            [$this->getReferencedKey()]
         );
 
         $result = [];
@@ -161,7 +178,7 @@ class ManyToMany extends Multi
      * @param Connection        $connection
      * @param Entity\Collection $collection   Target collection
      */
-    public function saveChanges($primaryValue, Connection $connection, Entity\Collection $collection)
+    public function saveChanges($primaryValue, Connection $connection, $collection)
     {
         $sourceAdapter = $connection->getAdapter($this->sourceReflection->getAdapterName());
         $targetAdapter = $connection->getAdapter($this->targetReflection->getAdapterName());
@@ -195,7 +212,7 @@ class ManyToMany extends Multi
                 $targetAdapter->execute(
                     $targetAdapter->createDeleteOne(
                         $this->targetReflection->getAdapterResource(),
-                        $this->targetReflection->getPrimaryProperty()->getName(true),
+                        $this->getReferencedKey(),
                         $targetPrimary
                     )
                 );
@@ -210,7 +227,7 @@ class ManyToMany extends Multi
                     $targetAdapter->createInsert(
                         $this->targetReflection->getAdapterResource(),
                         $entity->getData(),
-                        $this->targetReflection->getPrimaryProperty()->getName(true)
+                        $this->getReferencedKey()
                     )
                 );
             }

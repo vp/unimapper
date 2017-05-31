@@ -198,7 +198,7 @@ class Mapper
             $property = Entity\Reflection::load($entity)->getProperty($propertyName);
 
             // Skip associations & readonly
-            if ($property->hasOption(Entity\Reflection\Property::OPTION_ASSOC)
+            if ($property->hasAssociation()
                 || !$property->isWritable()
             ) {
                 continue;
@@ -425,8 +425,8 @@ class Mapper
             foreach (array_merge($associations['local'], $associations['remote']) as $association) {
 
                 // Add required keys from remote associations (must be after unmapping because ref key is unmapped)
+                // no mether of type check always if referencing key is present in selection
                 if ($association->isRemote()
-                    && ($association instanceof \UniMapper\Association\ManyToOne || $association instanceof \UniMapper\Association\OneToOne)
                     && !in_array($association->getReferencingKey(), $selectionUnmapped, true)
                 ) {
                     $selectionUnmapped[$association->getReferencingKey()] = $association->getReferencingKey();
@@ -442,16 +442,7 @@ class Mapper
 
                     // Remote required keys on target selection
                     if ($association->isRemote()) {
-                        $key = null;
-                        if ($association instanceof \UniMapper\Association\OneToMany) {
-                            $key = $association->getReferencedKey();
-                        } else if ($association instanceof \UniMapper\Association\ManyToMany) {
-                            $key = $association->getTargetPrimaryKey();
-                        } else if ($association instanceof \UniMapper\Association\ManyToOne) {
-                            $key = $association->getTargetPrimaryKey();
-                        } else if ($association instanceof \UniMapper\Association\OneToOne) {
-                            $key = $association->getTargetPrimaryKey();
-                        }
+                        $key = $association->getReferencedKey();
 
                         if ($key && in_array($key, $associationSelectionUnmapped) === false) {
                             $associationSelectionUnmapped[] = $key;

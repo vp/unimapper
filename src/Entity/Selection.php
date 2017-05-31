@@ -32,7 +32,7 @@ class Selection
         foreach ($entityReflection->getProperties() as $property) {
             // Exclude not mapped
             if (!$property->hasOption(Reflection\Property::OPTION_COMPUTED)
-                && !$property->hasOption(Reflection\Property::OPTION_ASSOC)
+                && !$property->hasAssociation()
             ) {
                 if ($property->getType() === Reflection\Property::TYPE_COLLECTION || $property->getType() === Reflection\Property::TYPE_ENTITY) {
                     $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
@@ -131,11 +131,11 @@ class Selection
             $isEntityOrCollection = in_array($property->getType(), [\UniMapper\Entity\Reflection\Property::TYPE_ENTITY, \UniMapper\Entity\Reflection\Property::TYPE_COLLECTION]) === true;
 
             if ($isEntityOrCollection
-                && !$property->hasOption(Reflection\Property::OPTION_ASSOC)
+                && !$property->hasAssociation()
                 && !$property->hasOption(Reflection\Property::OPTION_COMPUTED)
                 && $property->hasOption(Reflection\Property::OPTION_MAP_FILTER)) {
                 $returnSelection['entity'][] = $name;
-            } else if ($property->hasOption(Reflection\Property::OPTION_ASSOC)) {
+            } else if ($property->hasAssociation()) {
                 $targetReflection = \UniMapper\Entity\Reflection::load($property->getTypeOption());
                 $targetSelection = self::normalizeEntitySelection($targetReflection, $partialSelection);
                 if (isset($returnSelection['associated'][$name])) {

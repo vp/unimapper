@@ -118,7 +118,7 @@ class Filter
                         );
                     }
 
-                    if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
+                    if ($property->hasAssociation()
                         || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
                         || $property->getType() === Reflection\Property::TYPE_COLLECTION
                         || $property->getType() === Reflection\Property::TYPE_ENTITY
@@ -197,7 +197,7 @@ class Filter
                         continue;
                     }
 
-                    if ($property->hasOption(Reflection\Property::OPTION_ASSOC)
+                    if ($property->hasAssociation()
                         || $property->hasOption(Reflection\Property::OPTION_COMPUTED)
                         || $property->getType() === Reflection\Property::TYPE_COLLECTION
                         || $property->getType() === Reflection\Property::TYPE_ENTITY

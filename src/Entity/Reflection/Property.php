@@ -598,6 +598,27 @@ class Property
     }
 
     /**
+     * Return's true if property has association defined
+     *
+     * @return bool
+     */
+    public function hasAssociation()
+    {
+        return $this->hasOption(self::OPTION_ASSOC);
+    }
+
+    /**
+     * Return's property association instance
+     *
+     * @return \UniMapper\Association
+     * @throws Exception\InvalidArgumentException if association not defined for property
+     */
+    public function getAssociation()
+    {
+        return $this->getOption(self::OPTION_ASSOC);
+    }
+
+    /**
      * Get option
      *
      * @param string $key

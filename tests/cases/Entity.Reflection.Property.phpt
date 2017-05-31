@@ -321,43 +321,44 @@ class EntityReflectionPropertyTest extends \Tester\TestCase
     {
         // Local
         $local = $this->_createReflection('Simple[]', 'manyToMany', 'm:assoc(M:N) m:assoc-by(sourceId|source_target|targetId)');
-        Assert::type("UniMapper\Association\ManyToMany", $local->getOption(Entity\Reflection\Property::OPTION_ASSOC));
-        Assert::true($local->hasOption(Entity\Reflection\Property::OPTION_ASSOC));
-        Assert::false($local->getOption(Entity\Reflection\Property::OPTION_ASSOC)->isRemote());
-        Assert::same("FooAdapter", $local->getOption(Entity\Reflection\Property::OPTION_ASSOC)->getTargetAdapterName());
+        Assert::type("UniMapper\Association\ManyToMany", $local->getAssociation());
+        Assert::true($local->hasAssociation());
+        Assert::false($local->getAssociation()->isRemote());
+        Assert::same("FooAdapter", $local->getAssociation()->getTargetAdapterName());
 
         // Remote
-        $remote = $this->_createReflection('Remote[]', 'manyToMany', 'm:assoc(M:N) m:assoc-by(localId|local_remote|remoteId)')->getOption(Entity\Reflection\Property::OPTION_ASSOC);
+        /** @var \UniMapper\Association\ManyToMany $remote */
+        $remote = $this->_createReflection('Remote[]', 'manyToMany', 'm:assoc(M:N) m:assoc-by(localId|local_remote|remoteId)')->getAssociation();
         Assert::true($remote->isRemote());
         Assert::true($remote->isDominant());
         Assert::same("RemoteAdapter", $remote->getTargetAdapterName());
-        Assert::same("localId", $remote->getJoinKey());
+        Assert::same("localId", $remote->getJoinReferencingKey());
         Assert::same("local_remote", $remote->getJoinResource());
-        Assert::same("remoteId", $remote->getReferencingKey());
-        Assert::same("id", $remote->getTargetPrimaryKey());
+        Assert::same("remoteId", $remote->getJoinReferencedKey());
+        Assert::same("id", $remote->getReferencedKey());
+        Assert::same("simplePrimaryId", $remote->getReferencingKey());
 
         // Remote - not dominant
         $remoteNotDominant = $this->_createReflection('Remote[]', 'manyToMany', 'm:assoc(M<N) m:assoc-by(localId|local_remote|remoteId)');
-        Assert::true($remoteNotDominant->getOption(Entity\Reflection\Property::OPTION_ASSOC)->isRemote());
-        Assert::false($remoteNotDominant->getOption(Entity\Reflection\Property::OPTION_ASSOC)->isDominant());
+        Assert::true($remoteNotDominant->getAssociation()->isRemote());
+        Assert::false($remoteNotDominant->getAssociation()->isDominant());
     }
 
     public function testOptionAssocOneToMany()
     {
         $property = $this->_createReflection('Simple[]', 'oneToMany', 'm:assoc(1:N) m:assoc-by(sourceId)');
         Assert::true($property->hasOption("assoc"));
-        Assert::type("UniMapper\Association\OneToMany", $property->getOption(Entity\Reflection\Property::OPTION_ASSOC));
+        Assert::type("UniMapper\Association\OneToMany", $property->getAssociation());
     }
 
     public function testOptionAssocOneToOne()
     {
         $property = $this->_createReflection('Simple', 'oneToOne', 'm:assoc(1:1) m:assoc-by(targetId)');
         Assert::true($property->hasOption("assoc"));
-        $association = $property->getOption(Entity\Reflection\Property::OPTION_ASSOC);
+        $association = $property->getAssociation();
         Assert::type("UniMapper\Association\OneToOne", $association);
-        Assert::same("simplePrimaryId", $association->getTargetPrimaryKey());
+        Assert::same("simplePrimaryId", $association->getReferencedKey());
         Assert::same("targetId", $association->getReferencingKey());
-        Assert::same("targetId", $association->getKey());
     }
 
     /**
@@ -372,11 +373,10 @@ class EntityReflectionPropertyTest extends \Tester\TestCase
     {
         $property = $this->_createReflection('Simple', 'manyToOne', 'm:assoc(N:1) m:assoc-by(targetId)');
         Assert::true($property->hasOption("assoc"));
-        $association = $property->getOption(Entity\Reflection\Property::OPTION_ASSOC);
+        $association = $property->getAssociation();
         Assert::type("UniMapper\Association\ManyToOne", $association);
-        Assert::same("simplePrimaryId", $association->getTargetPrimaryKey());
+        Assert::same("simplePrimaryId", $association->getReferencedKey());
         Assert::same("targetId", $association->getReferencingKey());
-        Assert::same("targetId", $association->getKey());
     }
 
     /**

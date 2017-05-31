@@ -40,13 +40,7 @@ class OneToOne extends Single
         return $this->mapBy[0];
     }
 
-    public function getKey()
-    {
-        return $this->getReferencingKey();
-    }
-
-    public function getTargetPrimaryKey()
-    {
+    public function getReferencedKey() {
         return $this->targetReflection->getPrimaryProperty()->getName(true);
     }
 
@@ -57,7 +51,7 @@ class OneToOne extends Single
         $query = $targetAdapter->createSelect($this->getTargetResource(), $selection);
 
         $filter = $this->filter;
-        $filter[$this->getTargetPrimaryKey()][Entity\Filter::EQUAL] = $primaryValues;
+        $filter[$this->getReferencedKey()][Entity\Filter::EQUAL] = $primaryValues;
         if ($this->getTargetFilter()) {
             $filter = array_merge(
                 $connection->getMapper()->unmapFilter($this->getTargetReflection(), $this->getTargetFilter()),
@@ -72,7 +66,7 @@ class OneToOne extends Single
             return [];
         }
 
-        return $this->groupResult($result, [$this->getTargetPrimaryKey()]);
+        return $this->groupResult($result, [$this->getReferencedKey()]);
     }
 
 }

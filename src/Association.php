@@ -59,6 +59,8 @@ abstract class Association
     }
 
     /**
+     * MapBy definition
+     *
      * @internal
      * @return array
      */
@@ -67,41 +69,75 @@ abstract class Association
         return $this->mapBy;
     }
 
+    /**
+     * Source primary key name
+     *
+     * @return string
+     */
     public function getPrimaryKey()
     {
         return $this->sourceReflection->getPrimaryProperty()->getName(true);
     }
 
     /**
-     * Key name that refers target results to source entity
+     * Target entity reflection
      *
-     * @return string
+     * @return \UniMapper\Entity\Reflection
      */
-    public function getKey()
-    {
-        return $this->getPrimaryKey();
-    }
-
     public function getTargetReflection()
     {
         return $this->targetReflection;
     }
 
+    /**
+     * Target resource name
+     *
+     * @return string
+     */
     public function getTargetResource()
     {
         return $this->targetReflection->getAdapterResource();
     }
 
+    /**
+     * Source resource name
+     *
+     * @return string
+     */
     public function getSourceResource()
     {
         return $this->sourceReflection->getAdapterResource();
     }
 
+    /**
+     * Target adapter name
+     *
+     * @return string
+     */
     public function getTargetAdapterName()
     {
         return $this->targetReflection->getAdapterName();
     }
 
+    /**
+     * Referenced column name on target resource
+     *
+     * @return int|string
+     */
+    public abstract function getReferencedKey();
+
+    /**
+     * Referencing column name on source resource
+     *
+     * @return int|string
+     */
+    public abstract function getReferencingKey();
+
+    /**
+     * Return's true if association targets remote resource or is explicitly set as remote
+     *
+     * @return bool
+     */
     public function isRemote()
     {
         // optional checkout through annotation parameter
@@ -116,22 +152,40 @@ abstract class Association
             !== $this->targetReflection->getAdapterName();
     }
 
+    /**
+     * Association property name on source resource
+     *
+     * @return string
+     */
     public function getPropertyName()
     {
         return $this->propertyName;
     }
 
+    /**
+     * Selection for target resource
+     *
+     * @return array
+     */
     public function getTargetSelection()
     {
         return $this->targetSelection;
     }
 
+    /**
+     * Set's target resource selection
+     *
+     * @param array $targetSelection
+     */
     public function setTargetSelection(array $targetSelection)
     {
         $this->targetSelection = $targetSelection;
     }
 
     /**
+     * Return's unmapped target selection
+     *
+     * @internal
      * @return array
      */
     public function getTargetSelectionUnampped()
@@ -140,6 +194,9 @@ abstract class Association
     }
 
     /**
+     * Set's unmapped target selection
+     *
+     * @internal
      * @param array $targetSelectionUnampped
      */
     public function setTargetSelectionUnampped($targetSelectionUnampped)
@@ -147,11 +204,21 @@ abstract class Association
         $this->targetSelectionUnampped = $targetSelectionUnampped;
     }
 
+    /**
+     * Return's target filter
+     *
+     * @return array
+     */
     public function getTargetFilter()
     {
         return $this->targetFilter;
     }
 
+    /**
+     * Set's target filter
+     *
+     * @param array $filter
+     */
     public function setTargetFilter(array $filter)
     {
         $this->targetFilter = $filter;
@@ -215,6 +282,28 @@ abstract class Association
         return $converted;
     }
 
+    /**
+     * Load's association as remote for source referencing keys
+     *
+     * @param \UniMapper\Connection $connection     Connection instance
+     * @param array                 $primaryValues  Referencing key values
+     * @param array                 $selection      Target selection
+     *
+     * @return array Assoc array [referencing key value => associated row's]
+     */
     abstract public function load(Connection $connection, array $primaryValues, array $selection = []);
 
+    /**
+     * Save changes in target collection or entity
+     *
+     * @param string|int                          $primaryValue Primary value from source entity
+     * @param Connection                          $connection
+     * @param Entity\Collection|\UniMapper\Entity $associated   Target collection or entity
+     *
+     * @throws \UniMapper\Exception\AssociationException
+     */
+    public function saveChanges($primaryValue, Connection $connection, $associated)
+    {
+        throw new \UniMapper\Exception\AssociationException('Saving not implementet for association of type ' . __CLASS__);
+    }
 }
