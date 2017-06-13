@@ -109,7 +109,7 @@ class Selection
         $returnSelection = ['entity' => [], 'associated' => []];
         $map = [];
 
-        $publicProperties = $entityReflection->getPublicProperties();  // TODO public properties handling
+        $publicProperties = $entityReflection->getPublicProperties();
         foreach ($selection as $index => $name) {
 
             if (is_array($name)) {

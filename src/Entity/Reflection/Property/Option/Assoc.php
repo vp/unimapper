@@ -109,19 +109,9 @@ class Assoc implements IOption
         return isset($this->definition['selection']) ? $this->definition['selection'] : [];
     }
 
-    public function setTargetSelection(array $targetSelection)
-    {
-        $this->setParameter('selection', $targetSelection);
-    }
-
     public function getTargetFilter()
     {
         return isset($this->definition['filter']) ? $this->definition['filter'] : [];
-    }
-
-    public function setTargetFilter(array $filter)
-    {
-        $this->setParameter('filter', $filter);
     }
 
     /**

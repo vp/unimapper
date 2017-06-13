@@ -87,7 +87,7 @@ class SelectOne extends \UniMapper\Query
 
                 $associationFilter = $mapper->unmapFilter(
                     $definition->getTargetReflection(),
-                    $definition->getTargetFilter()
+                    $this->assocFilters[$colName]
                 );
 
                 $associated = $association->load(

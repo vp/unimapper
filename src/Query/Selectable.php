@@ -19,16 +19,16 @@ trait Selectable
     public static $KEY_FILTER = 'filter';
 
     /** @var array */
-    protected $adapterAssociations = [];
-
-    /** @var array */
-    protected $remoteAssociations = [];
-
-    /** @var array */
     protected $selection = [];
 
     /** @var  Assoc[] */
     protected $assocDefinitions = [];
+
+    /** @var array  */
+    protected $assocSelections = [];
+
+    /** @var array  */
+    protected $assocFilters = [];
 
     public function associate($args)
     {
@@ -72,10 +72,10 @@ trait Selectable
 
                 /** @var Assoc $option */
                 $option = $property->getOption(Assoc::KEY);
-                $option->setTargetFilter($filter);
-                $option->setTargetSelection($selection);
 
                 $this->assocDefinitions[$name] = $option;
+                $this->assocFilters[$name] = $filter;
+                $this->assocSelections[$name] = $selection;
             }
         }
 
@@ -174,8 +174,8 @@ trait Selectable
             $targetSelection = isset($selection[$propertyName]) ? $selection[$propertyName] : [];
 
             //- look if is set on association annotation
-            if ($definition->getTargetSelection()) {
-                $targetSelection = array_unique(array_merge($targetSelection, $definition->getTargetSelection()));
+            if (isset($this->assocSelections[$propertyName]) && $this->assocSelections[$propertyName]) {
+                $targetSelection = array_unique(array_merge($targetSelection, $this->assocSelections[$propertyName]));
             }
 
             // if no selection for associated property provided
