@@ -78,7 +78,7 @@ class EntityCollectionTest extends TestCase
     {
         $collection = new Collection("Foo");
         $collection[] = new Foo(["id" => 1]);
-        Assert::same('[{"id":1,"entity":null,"collection":[]}]', json_encode($collection));
+        Assert::same('[{"id":1,"entity":null,"collection":null}]', json_encode($collection));
     }
 
     public function testGetIterator()

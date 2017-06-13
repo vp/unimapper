@@ -107,7 +107,7 @@ class ValidatorTest extends TestCase
                 }, "Collection must contain two items at least!");
 
         $entity = $this->validator->getEntity();
-        $entity->collection[] = new Entity;
+        $entity->collection = [new Entity];
         $entity->collection['testIndex'] = new Entity;
         $this->validator->validate();
 
@@ -136,7 +136,7 @@ class ValidatorTest extends TestCase
 
     public function testGetMessages()
     {
-        $this->entity->collection[] = new Entity;
+        $this->entity->collection = [new Entity];
 
         $this->validator
             ->on("id")

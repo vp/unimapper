@@ -24,8 +24,17 @@ class Reflection
     /** @var string */
     private $fileName;
 
+    /** @var array $publicProperties List of public property names */
+    private $publicProperties = [];
+
+    /** @var array $computedProperties List of computed property names */
+    private $computedProperties = [];
+
     /** @var array $registered Registered reflections */
     private static $registered = [];
+
+    /** @var string Entity values iterator */
+    public static $entityIterator = '\UniMapper\Entity\Iterator';
 
     /**
      * @param string $class Entity class name
@@ -55,6 +64,19 @@ class Reflection
         $docComment = $reflectionClass->getDocComment();
         $this->_parseAdapter($docComment);
         $this->_parseProperties($docComment, $reflectionClass);
+        $this->_parsePublicProperties($reflectionClass);
+    }
+
+    private function _parsePublicProperties(\ReflectionClass $reflectionClass)
+    {
+        foreach ($reflectionClass->getProperties(\ReflectionProperty::IS_PUBLIC)
+                 as $property
+        ) {
+            if ($property->isStatic()) {
+                continue;
+            }
+            $this->publicProperties[] =  $property->getName();
+        }
     }
 
     private function _parseAdapter($docComment)
@@ -204,6 +226,10 @@ class Reflection
             }
 
             $this->properties[$property->getName()] = $property;
+
+            if ($property->hasOption(Entity\Reflection\Property\Option\Computed::KEY)) {
+                $this->computedProperties[] = $property->getName();
+            }
         }
     }
 
@@ -307,5 +333,29 @@ class Reflection
         );
     }
 
+    public function getPublicProperties()
+    {
+        return $this->publicProperties;
+    }
 
+    /**
+     * @return array
+     */
+    public function getComputedProperties()
+    {
+        return $this->computedProperties;
+    }
+
+    /**
+     * Create's entity values iterator
+     *
+     * @param \UniMapper\Entity $entity Entity instance
+     * @param array             $data   Entity data
+     *
+     * @return \UniMapper\Entity\Iterator
+     */
+    public function createIterator(Entity $entity, array $options = []) {
+        $class = $this::$entityIterator;
+        return new $class($entity, $options);
+    }
 }

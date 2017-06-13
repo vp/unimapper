@@ -77,8 +77,8 @@ class RepositoryTest extends TestCase
         $entity->id = 1;
         $entity->foo = "bar";
         $entity->entity = new Entity;
-        $entity->collection[] = new Entity;
-        $entity->assoc[] = new Entity;
+        $entity->collection = [new Entity];
+        $entity->assoc = [new Entity];
 
         Assert::same($entity, $this->repository->save($entity));
     }
@@ -121,7 +121,7 @@ class RepositoryTest extends TestCase
 
         $entity = new Entity;
         $entity->foo = "bar";
-        $entity->assoc[] = new Entity;
+        $entity->assoc = [new Entity];
 
         Assert::same($entity, $this->repository->save($entity));
         Assert::same(1, $entity->id);

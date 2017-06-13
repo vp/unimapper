@@ -203,26 +203,39 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
     }
 
     /**
-     * Serialize entity data and public properties
+     * Serialize entity
+     *
+     * Only data and selection are serialized
      *
      * @return string
      */
     public function serialize()
     {
+        $values = $this::getReflection()
+            ->createIterator($this, ['computed' => false, 'defined' => false])
+            ->toArray();
+
+        // serialize merged with data
         return serialize(
-            \UniMapper\Entity\Selection::filterValues(
-                Entity\Reflection::load(get_called_class()),
-                $this->data,
+            [
+                $values,
                 $this->getSelection()
-            )
+            ]
         );
     }
 
-    public function unserialize($data)
+    /**
+     * Unserialize Entity
+     *
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
     {
-        foreach (unserialize($data) as $name => $value) {
-            $this->{$name} = $value;
+        list($values, $selection) = unserialize($serialized);
+        foreach ($values as $k => $v) {
+            $this->{$k} = $v;
         }
+        $this->setSelection($selection);
     }
 
     /**
@@ -341,11 +354,6 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
             return $computedValue;
         }
 
-        // empty collection
-        if ($property->getType() === Entity\Reflection\Property::TYPE_COLLECTION) {
-            return $this->data[$name] = new Entity\Collection($property->getTypeOption());
-        }
-
         return null;
     }
 
@@ -357,6 +365,15 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
      */
     public function __set($name, $value)
     {
+        // automatic corversion of array to collection
+        $reflection = self::getReflection();
+        if ($reflection->hasProperty($name)
+            && $reflection->getProperty($name)->getType() === Entity\Reflection\Property::TYPE_COLLECTION
+            && is_array($value)
+        ) {
+            $value = new Entity\Collection($reflection->getProperty($name)->getTypeOption(), $value);
+        }
+
         $this->_setProperties([$name => $value], false);
     }
 
@@ -438,36 +455,19 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
      */
     public function toArray($nesting = false)
     {
-        $output = [];
-        foreach ($this::getReflection()->getProperties() as $propertyName => $property) {
-
-            $value = $this->{$propertyName};
-            if (($value instanceof Entity\Collection || $value instanceof Entity)
-                && $nesting
-            ) {
-                $value->setSelection($this->getSelection($propertyName));
-                $output[$propertyName] = $value->toArray($nesting);
-            } else {
-                $output[$propertyName] = $value;
-            }
-        }
-
-        return \UniMapper\Entity\Selection::filterValues(
-            $this::getReflection(),
-            $output,
-            $this->getSelection()
-        );
-    }
-
-    private function _getPublicPropertyValues()
-    {
-        $result = [];
-        foreach (Entity\Reflection::load(get_called_class())->getPublicProperties() as $name) {
-            if (isset($this->{$name})) {
-                $result[$name] = $this->{$name};
-            }
-        }
-        return $result;
+        $self = $this;
+        return $this->getIterator()
+            ->setMapCallback(function ($value, $propertyName) use ($nesting, $self) {
+                if (($value instanceof Entity\Collection || $value instanceof Entity)
+                    && $nesting
+                ) {
+                    $value->setSelection($self->getSelection($propertyName));
+                    return $value->toArray($nesting);
+                } else {
+                    return $value;
+                }
+            })
+            ->toArray();
     }
 
     /**
@@ -477,45 +477,37 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
      */
     public function jsonSerialize()
     {
-        $output = [];
-        foreach ($this::getReflection()->getProperties() as $propertyName => $property) {
+        $reflection = $this::getReflection();
+        return $this->getIterator()
+            ->setMapCallback(function ($value, $propertyName) use ($reflection) {
+                $property = $reflection->hasProperty($propertyName)
+                    ? $reflection->getProperty($propertyName)
+                    : false;
 
-            $value = $this->{$propertyName};
-            if ($value instanceof Entity\Collection || $value instanceof Entity) {
-                $value->setSelection($this->getSelection($propertyName));
-                $output[$propertyName] = $value->jsonSerialize();
-            } elseif ($value instanceof \DateTime
-                && $property->getType() === Entity\Reflection\Property::TYPE_DATE
-            ) {
-                $output[$propertyName] = (array) $value;
-                $output[$propertyName]["date"] = $value->format(self::$dateFormat);
-            } else {
-                $output[$propertyName] = $value;
-            }
-        }
-
-        return \UniMapper\Entity\Selection::filterValues(
-            $this::getReflection(),
-            $output,
-            $this->getSelection()
-        );
+                if ($value instanceof Entity\Collection || $value instanceof Entity) {
+                    $value->setSelection($this->getSelection($propertyName));
+                    return $value->jsonSerialize();
+                } elseif ($value instanceof \DateTime
+                    && $property && $property->getType() === Entity\Reflection\Property::TYPE_DATE
+                ) {
+                    $a = (array)$value;
+                    $a["date"] = $value->format(self::$dateFormat);
+                    return $a;
+                } else {
+                    return $value;
+                }
+            })
+            ->toArray();
     }
 
-    public function seek($position)
-    {
-        foreach ($this->data as $name => $value) {
-            if ($name === $position) {
-                return;
-            }
-            $this->next();
-        }
-        throw new \OutOfBoundsException("Invalid seek position " . $position . "!");
-    }
-
-
+    /**
+     * Entity iterator
+     *
+     * @return \UniMapper\Entity\Iterator
+     */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return $this->getReflection()
+            ->createIterator($this);
     }
-
 }

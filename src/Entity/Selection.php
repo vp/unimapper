@@ -49,10 +49,10 @@ class Selection
             }
         }
 
-//- TODO public properties handling
-//        foreach ($entityReflection->getPublicProperties() as $publicProperty) {
-//            $selection[] = $publicProperty;
-//        }
+        // public properties handling
+        foreach ($entityReflection->getPublicProperties() as $publicProperty) {
+            $selection[] = $publicProperty;
+        }
 
         array_pop($nesting);
         return $selection;
@@ -109,7 +109,7 @@ class Selection
         $returnSelection = ['entity' => [], 'associated' => []];
         $map = [];
 
-        $publicProperties = []; //$entityReflection->getPublicProperties();  // TODO public properties handling
+        $publicProperties = $entityReflection->getPublicProperties();  // TODO public properties handling
         foreach ($selection as $index => $name) {
 
             if (is_array($name)) {
@@ -175,14 +175,14 @@ class Selection
         return $returnSelection;
     }
 
-    public static function filterValues(Reflection $reflection, array $values, array $public = [], array $selection = []) {
+    public static function filterValues(Reflection $reflection, array $values, array $selection = []) {
 
         if (!$selection) {
-            return array_merge($values, $public);
+            return $values;
         }
 
         if (!$values) {
-            return array_merge($values, $public);
+            return $values;
         }
 
         $result = [];
@@ -193,27 +193,18 @@ class Selection
             }
             if ($index !== false) {
                 $result[$k] = $v;
-            } else if ($v && $reflection->getProperty($k)->hasOption(\UniMapper\Entity\Reflection\Property\Option\Computed::KEY)) {
-                // computed with value
-                $result[$k] = $v;
-            }
-        }
-
-        foreach ($public as $k => $v) {
-            $index = array_search($k, $selection);
-            if ($index === false && isset($selection[$k])) {
-                $index = $k;
-            }
-            if ($index !== false) {
-                $result[$k] = $v;
             } else if ($v) {
-                // was set
-                $result[$k] = $v;
+                if (!$reflection->hasProperty($k)) {
+                    // was set
+                    $result[$k] = $v;
+                } else if ($reflection->getProperty($k)->hasOption(\UniMapper\Entity\Reflection\Property\Option\Computed::KEY)) {
+                    // computed with value
+                    $result[$k] = $v;
+                }
             }
         }
 
-        // public properties values are already checked
-        return array_merge($result, $public);
+        return $result;
     }
 
     public static function validateInputSelection(Reflection $reflection, array $selection)
