@@ -144,7 +144,14 @@ trait Selectable
 
                 //- look if is set on association annotation
                 if ($association->getTargetSelection()) {
-                    $targetSelection = array_unique(array_merge($targetSelection, $association->getTargetSelection()));
+                    //- HACK will be fixed in 2.0
+                    if ($association->getTargetSelection()) {
+                        if ($targetSelection) {
+                            $targetSelection = array_merge($targetSelection, $association->getTargetSelection());
+                        } else {
+                            $targetSelection = $association->getTargetSelection();
+                        }
+                    }
                 }
 
                 // if no selection for associated property provided
