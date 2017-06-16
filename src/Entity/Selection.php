@@ -142,7 +142,8 @@ class Selection
             if ($isEntityOrCollection
                 && !$property->hasOption(Reflection\Property\Option\Assoc::KEY)
                 && !$property->hasOption(Reflection\Property\Option\Computed::KEY)
-                && ($property->hasOption(Reflection\Property\Option\Map::KEY)
+                && ($property->hasOption(Reflection\Property\Option\Map::KEY) 
+                    && $property->getOption(Reflection\Property\Option\Map::KEY) !== false
                     && $property->getOption(Reflection\Property\Option\Map::KEY)->getFilterIn()
                 )
             ) {

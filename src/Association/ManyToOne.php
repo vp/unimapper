@@ -29,7 +29,9 @@ class ManyToOne extends Association
             );
         }
 
-        $referencingKey = isset($definition['by']) ? $definition['by'] : null;
+        $referencingKey = isset($definition['by']) && $definition['by'] && isset($definition['by'][0])
+            ? $definition['by'][0]
+            : null;
 
         if (!$referencingKey) {
 

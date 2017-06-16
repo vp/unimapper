@@ -96,7 +96,11 @@ class Mapper
         } elseif ($property->getType() === Entity\Reflection\Property::TYPE_ENTITY) {
             // Entity
 
-            if ($value instanceof Entity && $property->hasOption(Entity\Reflection\Property::OPTION_MAP_FILTER)) {
+            if ($value instanceof Entity
+                && $property->hasOption(Entity\Reflection\Property\Option\Map::KEY)
+                && $property->getOption(Entity\Reflection\Property\Option\Map::KEY) !== false
+                && $property->getOption(Entity\Reflection\Property\Option\Map::KEY)->getFilterIn()
+            ) {
                 // if value is entity created by filter don't map it again
                 return $value;
             }

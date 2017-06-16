@@ -25,7 +25,9 @@ class OneToMany extends Association
     ) {
         parent::__construct($sourceReflection, $targetReflection);
 
-        $referencedKey = isset($definition['by']) ? $definition['by'] : null;
+        $referencedKey = isset($definition['by']) && $definition['by'] && isset($definition['by'][0])
+            ? $definition['by'][0]
+            : null;
 
         if (!$referencedKey) {
 
