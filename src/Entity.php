@@ -8,6 +8,7 @@ use UniMapper\Entity\Reflection\Property\Option\Computed;
 
 abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggregate
 {
+    public static $_MAGIC_COLLECTION_CREATION = false;
 
     public static $dateFormat = "Y-m-d";
 
@@ -93,6 +94,14 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
 
         foreach ($values as $name => $value) {
 
+            if (\UniMapper\Entity\Iterator::$ITERATE_OPTIONS[\UniMapper\Entity\Iterator::ITERATE_PUBLIC]) {
+                // Public
+                if (in_array($name, $reflection->getPublicProperties())) {
+                    $this->{$name} = $value;
+                    continue;
+                }
+            }
+            
             // Undefined
             if (!$reflection->hasProperty($name)) {
 
@@ -354,6 +363,12 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
             return $computedValue;
         }
 
+        // empty collection
+        if (self::$_MAGIC_COLLECTION_CREATION && $property->getType() === Entity\Reflection\Property::TYPE_COLLECTION) {
+            //trigger_error(__METHOD__ . ' Calling on empty collection is deprecated.', E_USER_DEPRECATED);
+            return $this->data[$name] = new Entity\Collection($property->getTypeOption());
+        }
+        
         return null;
     }
 

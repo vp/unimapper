@@ -166,13 +166,10 @@ class Property
 
     public function getUnmapped()
     {
-        if ($this->hasOption(Entity\Reflection\Property\Option\Map::KEY)
-            && !$this->getOption(Entity\Reflection\Property\Option\Map::KEY)
-        ) {
-            throw new \Exception("Mapping is disabled!");
-        }
-
-        $name = $this->hasOption(Entity\Reflection\Property\Option\Map::KEY) ? $this->getOption(Entity\Reflection\Property\Option\Map::KEY)->getUnmapped() : $this->name;
+        $name = $this->hasOption(Entity\Reflection\Property\Option\Map::KEY)
+        && $this->getOption(Entity\Reflection\Property\Option\Map::KEY)
+            ? $this->getOption(Entity\Reflection\Property\Option\Map::KEY)->getUnmapped()
+            : $this->name;
 
         $adapterName = $this->reflection->getAdapterName();
         if (Convention::hasAdapterConvention($adapterName)) {
