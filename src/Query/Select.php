@@ -69,9 +69,9 @@ class Select extends \UniMapper\Query
         $this->setQueryFilters($this->filter, $query, $mapper);
 
         // Set's query adapter local associations
-        $adapterAssociations = $this->getAdapterAssociations();
+        list($adapterAssociations, $adapterAssociationsFilters) = $this->getAdapterAssociations($mapper);
         if ($adapterAssociations) {
-            $query->setAssociations($adapterAssociations);
+            $query->setAssociations($adapterAssociations, $adapterAssociationsFilters);
         }
 
         // Execute adapter query

@@ -57,9 +57,9 @@ class SelectOne extends \UniMapper\Query
             $this->createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations)
         );
 
-        $adapterAssociations = $this->getAdapterAssociations();
+        list($adapterAssociations, $adapterAssociationsFilters) = $this->getAdapterAssociations($mapper);
         if ($adapterAssociations) {
-            $query->setAssociations($adapterAssociations);
+            $query->setAssociations($adapterAssociations, $adapterAssociationsFilters);
         }
 
         $result = $adapter->execute($query);

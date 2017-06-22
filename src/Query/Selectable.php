@@ -109,15 +109,22 @@ trait Selectable
      *
      * @return array|\UniMapper\Entity\Reflection\Property\Option\Assoc[]
      */
-    protected function getAdapterAssociations()
+    protected function getAdapterAssociations(\UniMapper\Mapper $mapper)
     {
         $associations = [];
+        $associationsFilters = [];
         foreach ($this->assocDefinitions as $propertyName => $definition) {
             if (!$definition->isRemote()) {
                 $associations[$propertyName] = $definition;
+                $associationsFilters[$propertyName] = isset($this->assocFilters[$propertyName])
+                    ? $mapper->unmapFilter(
+                        $definition->getTargetReflection(),
+                        $this->assocFilters[$propertyName]
+                    )
+                    : [];
             }
         }
-        return $associations;
+        return [$associations, $associationsFilters];
     }
 
 
