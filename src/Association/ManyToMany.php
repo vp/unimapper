@@ -67,7 +67,7 @@ class ManyToMany extends Association
         $this->joinKey = $arguments[0];
         $this->joinResource = $arguments[1];
         $this->referencingKey = $arguments[2];
-        $this->dominant = $definition['type'] === "m<n" ? false : true;
+        $this->dominant = strtolower($definition['type']) === "m<n" ? false : true;
     }
 
     /**
