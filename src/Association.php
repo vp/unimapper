@@ -21,6 +21,9 @@ class Association
     /** @var Reflection */
     protected $targetReflection;
 
+    /** @var  array */
+    private static $_customAssociations;
+
     /**
      * @param Reflection $sourceReflection
      * @param Reflection $targetReflection
@@ -49,6 +52,15 @@ class Association
     public function getKey()
     {
         return $this->sourceReflection->getPrimaryProperty()->getUnmapped();
+    }
+
+    /**
+     * @param string          $name  Assoc name/type
+     * @param string|callable $value Class name or callable
+     */
+    public static function registerAssocType($name, $value)
+    {
+        self::$_customAssociations[strtolower($name)] = $value;
     }
 
     /**
@@ -90,7 +102,27 @@ class Association
                     $definition
                 );
             default:
-                throw new AssociationException("Unsupported association type");
+                if (isset(self::$_customAssociations[$option->getType()])) {
+                    if (is_callable(self::$_customAssociations[$option->getType()])) {
+                        return call_user_func_array(
+                            self::$_customAssociations[$option->getType()],
+                            [
+                                $option->getSourceReflection(),
+                                $option->getTargetReflection(),
+                                $definition
+                            ]
+                        );
+                    } else {
+                        $class = self::$_customAssociations[$option->getType()];
+                        return new $class(
+                            $option->getSourceReflection(),
+                            $option->getTargetReflection(),
+                            $definition
+                        );
+                    }
+                } else {
+                    throw new AssociationException("Unsupported association type");
+                }
         }
     }
 

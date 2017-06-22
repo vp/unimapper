@@ -12,6 +12,8 @@ class Assoc implements IOption
 
     const KEY = "assoc";
 
+    public static $assocTypes = ["m:n","m>n","m<n","1:1","1:n","n:1"];
+
     /** @var Reflection */
     private $targetReflection;
 
@@ -131,6 +133,15 @@ class Assoc implements IOption
     }
 
     /**
+     * Custom association?
+     *
+     * @return bool
+     */
+    public function isCustom(){
+        return in_array($this->getType(), self::$assocTypes) === false;
+    }
+
+    /**
      * Cross-adapter association?
      *
      * @return bool
@@ -141,8 +152,8 @@ class Assoc implements IOption
         if (isset($this->definition['remote'])) {
             return $this->definition['remote'] === 'true' || is_int($this->definition['remote']) ? (bool) $this->definition['remote'] : false;
         }
-        // default behaviour
 
+        // default behaviour
         return $this->sourceReflection->getAdapterName()
             !== $this->targetReflection->getAdapterName();
     }
