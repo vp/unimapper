@@ -170,7 +170,7 @@ class Iterator extends \FilterIterator
 
             return true;
         } else {
-            return true;
+            return $this->iterateDefined;
         }
     }
 

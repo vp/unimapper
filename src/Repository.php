@@ -252,12 +252,12 @@ abstract class Repository
      * @throws Exception\RepositoryException
      */
     public function find(array $filter = [], array $orderBy = [], $limit = 0,
-        $offset = 0, array $associate = []
+        $offset = 0, array $associate = [], array $selection = []
     ) {
         try {
 
             $query = $this->query()
-                ->select()
+                ->select($selection)
                 ->associate($associate)
                 ->setFilter($filter);
 
@@ -271,10 +271,10 @@ abstract class Repository
         }
     }
 
-    public function findOne($primaryValue, array $associate = [])
+    public function findOne($primaryValue, array $associate = [], array $selection = [])
     {
         try {
-            return $this->query()->selectOne($primaryValue)
+            return $this->query()->selectOne($primaryValue, $selection)
                 ->associate($associate)
                 ->run($this->connection);
         } catch (QueryException $e) {
