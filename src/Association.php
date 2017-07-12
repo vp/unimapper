@@ -6,6 +6,7 @@ use UniMapper\Association\ManyToMany;
 use UniMapper\Association\ManyToOne;
 use UniMapper\Association\OneToMany;
 use UniMapper\Association\OneToOne;
+use UniMapper\Entity\Collection;
 use UniMapper\Entity\Reflection;
 use UniMapper\Entity\Reflection\Property\Option\Assoc;
 use UniMapper\Exception\AssociationException;
@@ -196,6 +197,21 @@ class Association
      */
     public function load(Connection $connection, array $primaryValues, array $selection = [], $filter = []) {
         throw new AssociationException('Load not implemented for association!');
+    }
+
+    /**
+     * Save changes in target collection or entity
+     *
+     * @param string            $primaryValue Primary value from source entity
+     * @param Connection        $connection   Connection instance
+     * @param Collection|Entity $value        Target collection or entity
+     *
+     * @throws AssociationException
+     * @return void
+     */
+    public function saveChanges($primaryValue, Connection $connection, $value)
+    {
+        throw new AssociationException('Save not implemented for association!');
     }
 
 }

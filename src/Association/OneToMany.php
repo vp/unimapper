@@ -83,15 +83,16 @@ class OneToMany extends Association
      * Save changes in target collection
      *
      * @param string     $primaryValue Primary value from source entity
-     * @param Connection $connection
+     * @param Connection $connection   Connection instance
      * @param Collection $collection   Target collection
      *
      * @throws AssociationException
+     * @return void
      */
     public function saveChanges(
         $primaryValue,
         Connection $connection,
-        Collection $collection
+        $collection
     ) {
         if ($collection->getEntityClass() !== $this->targetReflection->getClassName()) {
             throw new AssociationException(

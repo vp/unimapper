@@ -165,12 +165,13 @@ class ManyToMany extends Association
      * Save changes in target collection
      *
      * @param string     $primaryValue Primary value from source entity
-     * @param Connection $connection
+     * @param Connection $connection   Connection instance
      * @param Collection $collection   Target collection
      *
      * @throws AssociationException
+     * @return void
      */
-    public function saveChanges($primaryValue, Connection $connection, Collection $collection)
+    public function saveChanges($primaryValue, Connection $connection, $collection)
     {
         if ($collection->getEntityClass() !== $this->targetReflection->getClassName()) {
             throw new AssociationException(

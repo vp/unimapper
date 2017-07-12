@@ -89,7 +89,17 @@ class ManyToOne extends Association
         );
     }
 
-    public function saveChanges($primaryValue, Connection $connection, Entity $entity)
+    /**
+     * Save changes in target entity
+     *
+     * @param string     $primaryValue Primary value from source entity
+     * @param Connection $connection   Connection instance
+     * @param Entity     $entity       Target entity
+     *
+     * @throws AssociationException
+     * @return void
+     */
+    public function saveChanges($primaryValue, Connection $connection, $entity)
     {
         if (get_class($entity) !== $this->targetReflection->getClassName()) {
             throw new AssociationException(
