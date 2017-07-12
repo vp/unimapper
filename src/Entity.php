@@ -355,7 +355,15 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
         // computed property
         if ($property->hasOption(Computed::KEY)) {
 
-            $computedValue = $this->{$property->getOption(Computed::KEY)->getName()}();
+            /** @var Computed $computedOption */
+            $computedOption = $property->getOption(Computed::KEY);
+
+            if (!$computedOption->hasDependencies($this)) {
+                return null;
+            }
+            $computedValue = method_exists($this, $computedOption->getName())
+                ? $this->{$computedOption->getName()}()
+                : $computedOption->compute($this);
             if ($computedValue === null) {
                 return null;
             }
