@@ -36,9 +36,9 @@ class Association
         Reflection $targetReflection
     ) {
         if ($sourceReflection->getAdapterName() === $targetReflection->getAdapterName()) {
-            throw new AssociationException(
-                "Associations with same adapters should be managed by relevant adapter!"
-            );
+//            throw new AssociationException(
+//                "Associations with same adapters should be managed by relevant adapter!"
+//            );
         }
 
         $this->sourceReflection = $sourceReflection;

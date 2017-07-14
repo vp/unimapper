@@ -23,10 +23,10 @@ abstract class Repository
      * Insert/update entity
      *
      * @param Entity $entity
+     * @param array  $associate
      *
-     * @return Entity
-     *
-     * @throws Exception\RepositoryException
+     * @return \UniMapper\Entity
+     * @throws \UniMapper\Exception\RepositoryException
      */
     public function save(Entity $entity)
     {
@@ -69,9 +69,8 @@ abstract class Repository
      * @param Entity $entity
      *
      * @return mixed
-     *
-     * @throws Exception\ValidatorException
-     * @throws Exception\RepositoryException
+     * @throws \UniMapper\Exception\RepositoryException
+     * @throws \UniMapper\Exception\ValidatorException
      */
     public function create(Entity $entity)
     {
@@ -110,8 +109,8 @@ abstract class Repository
      * @param Entity $entity
      * @param mixed  $primaryValue
      *
-     * @throws Exception\ValidatorException
-     * @throws Exception\RepositoryException
+     * @throws \UniMapper\Exception\RepositoryException
+     * @throws \UniMapper\Exception\ValidatorException
      */
     public function update(Entity $entity, $primaryValue)
     {

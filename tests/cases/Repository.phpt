@@ -83,6 +83,30 @@ class RepositoryTest extends TestCase
         Assert::same($entity, $this->repository->save($entity));
     }
 
+    public function testSaveAssoc()
+    {
+        $adapterQueryMock = Mockery::mock("UniMapper\Adapter\IQuery");
+
+        $this->adapterMock->shouldReceive("createUpdateOne")
+            ->once()
+            ->with("Entity", "id", 1, ["foo" => "bar", "entity" => [], "collection" => [[]]])
+            ->andReturn($adapterQueryMock);
+        $this->adapterMock->shouldReceive("onExecute")
+            ->once()
+            ->with($adapterQueryMock)
+            ->andReturn(true);
+
+        $entity = new Entity;
+        $entity->id = 1;
+        $entity->foo = "bar";
+        $entity->entity = new Entity;
+        $entity->collection = [new Entity];
+        $entity->assoc = [new Entity];
+        $entity->assoc->attach();
+
+        Assert::same($entity, $this->repository->save($entity));
+    }
+
     /**
      * @throws UniMapper\Exception\RepositoryException Entity was not successfully updated!
      */
