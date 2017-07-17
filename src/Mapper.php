@@ -308,24 +308,16 @@ class Mapper
             foreach ($filter as $name => $item) {
                 $assocDelimiterPos = strpos($name, '.');
                 if ($assocDelimiterPos !== false) {
-                    if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
-                        $assocPropertyName = substr($name, 0, $assocDelimiterPos);
-                        $assocPropertyTargetName = substr($name, $assocDelimiterPos + 1);
-                        $assocProperty = $reflection->getProperty($assocPropertyName);
-                        $assocEntityReflection = \UniMapper\Entity\Reflection::load($assocProperty->getTypeOption());
-                        $property = $assocEntityReflection->getProperty($assocPropertyTargetName);
-                        $unmappedName = $this->adapterMappings[$reflection->getAdapterName()]
-                            ->unmapFilterJoinProperty($reflection, $name);
-                    } else {
+                    if (!isset($this->adapterMappings[$reflection->getAdapterName()])) {
                         throw new Exception\InvalidArgumentException(
-                            "Unknown filter property " . $name . "!"
+                            "Adapter not support nested filters " . $name . "!"
                         );
                     }
                 } else {
                     $property = $reflection->getProperty($name);
                     $unmappedName = $property->getUnmapped();
+                    $this->unmapFilterProperty($property, $unmappedName, $item, $result);
                 }
-                $this->unmapFilterProperty($property, $unmappedName, $item, $result);
             }
         }
 
@@ -340,7 +332,7 @@ class Mapper
      *
      * @throws \UniMapper\Exception\InvalidArgumentException
      */
-    protected function unmapFilterProperty(Reflection\Property $property, $unmappedName, array $item, &$result)
+    public function unmapFilterProperty(Reflection\Property $property, $unmappedName, array $item, &$result)
     {
         foreach ($item as $modifier => $value) {
 
@@ -377,7 +369,7 @@ class Mapper
     {
         if (isset($this->adapterMappings[$reflection->getAdapterName()])) {
             return $this->adapterMappings[$reflection->getAdapterName()]
-                ->unmapFilterJoins($reflection, $filter);
+                ->unmapFilterJoins($this, $reflection, $filter);
         }
 
         return [];

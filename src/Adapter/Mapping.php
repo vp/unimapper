@@ -18,14 +18,9 @@ abstract class Mapping
         return $value;
     }
     
-    public function unmapFilterJoins(Reflection $reflection, array $filter)
+    public function unmapFilterJoins(\UniMapper\Mapper $mapper, Reflection $reflection, array $filter)
     {
         return [];
-    }
-    
-    public function unmapFilterJoinProperty(Reflection $reflection, $name)
-    {
-        return $name;
     }
 
     /**

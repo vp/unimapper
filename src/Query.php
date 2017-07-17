@@ -65,15 +65,14 @@ abstract class Query
     protected function setQueryFilters($filter, IQuery $query, Mapper $mapper)
     {
         if ($filter) {
-            $query->setFilter(
-                $mapper->unmapFilter(
-                    $this->reflection,
-                    $filter
-                )
+            $filterUnmapped = $mapper->unmapFilter(
+                $this->reflection,
+                $filter
             );
 
+
             if ($query instanceof IQueryWithJoins) {
-                $joins = $mapper->unmapFilterJoins(
+                list($joinsFilters, $joins) = $mapper->unmapFilterJoins(
                     $this->reflection,
                     $filter
                 );
@@ -81,7 +80,13 @@ abstract class Query
                 if ($joins) {
                     $query->setJoins($joins);
                 }
+
+                if ($joinsFilters) {
+                    $filterUnmapped = array_merge($filterUnmapped, $joinsFilters);
+                }
             }
+
+             $query->setFilter($filterUnmapped);
         }
     }
 
