@@ -134,6 +134,28 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate,
         }
     }
 
+    /**
+     * @param \UniMapper\Entity\Collection|Entity[] $collection
+     */
+    public function set(Collection $collection, $change = Entity::CHANGE_ADD) {
+        foreach ($collection as $entity) {
+            switch ($change) {
+                case Entity::CHANGE_ADD:
+                    $this->add($entity);
+                    break;
+                case Entity::CHANGE_ATTACH:
+                    $this->attach($entity);
+                    break;
+                case Entity::CHANGE_DETACH:
+                    $this->detach($entity);
+                    break;
+                case Entity::CHANGE_REMOVE:
+                    $this->remove($entity);
+                    break;
+            }
+        }
+    }
+
     public function getChanges()
     {
         return $this->changes;
