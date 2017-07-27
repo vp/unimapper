@@ -49,16 +49,12 @@ class Mapper
         if ($property->hasOption(Reflection\Property\Option\Map::KEY)) {
 
             $mapOption = $property->getOption(Reflection\Property\Option\Map::KEY);
-            if (!$mapOption) {
-                throw new Exception\InvalidArgumentException(
-                    "Mapping disabled on property " . $property->getName() . "!"
-                );
-            }
-
-            // Call map filter from property option
-            $filterIn = $mapOption->getFilterIn();
-            if ($filterIn) {
-                $value = call_user_func($filterIn, $value);
+            if ($mapOption) {
+                // Call map filter from property option
+                $filterIn = $mapOption->getFilterIn();
+                if ($filterIn) {
+                    $value = call_user_func($filterIn, $value);
+                }
             }
         }
 
@@ -237,16 +233,12 @@ class Mapper
         if ($property->hasOption(Reflection\Property\Option\Map::KEY)) {
 
             $mapOption = $property->getOption(Reflection\Property\Option\Map::KEY);
-            if (!$mapOption) {
-                throw new Exception\InvalidArgumentException(
-                    "Mapping disabled on property " . $property->getName() . "!"
-                );
-            }
-
-            // Call map filter from property option
-            $filterOut = $mapOption->getFilterOut();
-            if ($filterOut) {
-                $value = call_user_func($filterOut, $value);
+            if ($mapOption) {
+                // Call map filter from property option
+                $filterOut = $mapOption->getFilterOut();
+                if ($filterOut) {
+                    $value = call_user_func($filterOut, $value);
+                }
             }
         }
 
