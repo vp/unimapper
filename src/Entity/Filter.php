@@ -18,7 +18,8 @@ class Filter
         GREATER = ">",
         LESS = "<",
         GREATEREQUAL = ">=",
-        LESSEQUAL = "<=";
+        LESSEQUAL = "<=",
+        _NATIVE = "!";
 
     /** @var array */
     public static $modifiers = [
@@ -95,6 +96,10 @@ class Filter
             // Filter item
 
             foreach ($filter as $name => $item) {
+
+                if ($name === self::_NATIVE) {
+                   continue;
+                }
 
                 if (!is_array($item) || !is_string($name)) {
                     throw new Exception\FilterException(

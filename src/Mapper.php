@@ -305,6 +305,8 @@ class Mapper
                             "Adapter not support nested filters " . $name . "!"
                         );
                     }
+                } else if ($name === Filter::_NATIVE) {
+                    $result[$name] = $item;
                 } else {
                     $property = $reflection->getProperty($name);
                     $unmappedName = $property->getUnmapped();

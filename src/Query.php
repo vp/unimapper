@@ -4,6 +4,7 @@ namespace UniMapper;
 
 use UniMapper\Adapter\IQuery;
 use UniMapper\Adapter\IQueryWithJoins;
+use UniMapper\Entity\Selection;
 use UniMapper\Exception\QueryException;
 
 abstract class Query
@@ -82,7 +83,7 @@ abstract class Query
                 }
 
                 if ($joinsFilters) {
-                    $filterUnmapped = array_merge($filterUnmapped, $joinsFilters);
+                    $filterUnmapped = Selection::mergeArrays($filterUnmapped, $joinsFilters);
                 }
             }
 
