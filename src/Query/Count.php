@@ -32,7 +32,7 @@ class Count extends \UniMapper\Query implements ICachableQuery
         if ($cache) {
 
             $cachedResult = $cache->load($this);
-            if ($cachedResult) {
+            if ($cachedResult !== null) {
                 return $cachedResult;
             }
         }
@@ -58,9 +58,9 @@ class Count extends \UniMapper\Query implements ICachableQuery
 
             // Cache invalidation should depend on entity changes
             if (isset($cachedOptions[ICache::FILES])) {
-                $cachedOptions[ICache::FILES] += $this->entityReflection->getRelatedFiles();
+                $cachedOptions[ICache::FILES] += $this->reflection->getRelatedFiles();
             } else {
-                $cachedOptions[ICache::FILES] = $this->entityReflection->getRelatedFiles();
+                $cachedOptions[ICache::FILES] = $this->reflection->getRelatedFiles();
             }
 
             $cache->save(
