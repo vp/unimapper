@@ -292,7 +292,7 @@ abstract class Repository
      *
      * @throws Exception\RepositoryException
      */
-    public function findPrimaries(array $primaryValues, array $associate = [])
+    public function findPrimaries(array $primaryValues, array $associate = [], array $selection = [])
     {
         $reflection = Entity\Reflection::load($this->getEntityName());
 
@@ -312,7 +312,7 @@ abstract class Repository
         try {
 
             return $this->query()
-                ->select()
+                ->select($selection)
                 ->setFilter(
                     [
                         $reflection->getPrimaryProperty()->getName() => [
