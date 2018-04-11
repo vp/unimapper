@@ -106,7 +106,7 @@ class Mapper
         ) {
             // DateTime & Date
 
-            if ($value instanceof \DateTime) {
+            if ($value instanceof \DateTimeInterface) {
                 return $value;
             } elseif (is_array($value) && isset($value["date"])) {
                 $date = $value["date"];

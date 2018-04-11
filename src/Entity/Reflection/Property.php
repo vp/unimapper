@@ -326,7 +326,7 @@ class Property
         } elseif ($this->type === self::TYPE_DATETIME) {
             // DateTime
 
-            if ($value instanceof \DateTime) {
+            if ($value instanceof \DateTimeInterface) {
                 return;
             } else {
                 throw new Exception\InvalidArgumentException(
@@ -338,7 +338,7 @@ class Property
         } elseif ($this->type === self::TYPE_DATE) {
             // Date
 
-            if ($value instanceof \DateTime) {
+            if ($value instanceof \DateTimeInterface) {
                 return;
             } else {
                 throw new Exception\InvalidArgumentException(
@@ -386,7 +386,7 @@ class Property
         ) {
             // DateTime
 
-            if ($value instanceof \DateTime) {
+            if ($value instanceof \DateTimeInterface) {
                 return $value;
             } elseif (is_array($value) && isset($value["date"])) {
                 $date = $value["date"];

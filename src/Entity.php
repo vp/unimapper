@@ -510,7 +510,7 @@ abstract class Entity implements \JsonSerializable, \Serializable, \IteratorAggr
                 if ($value instanceof Entity\Collection || $value instanceof Entity) {
                     $value->setSelection($this->getSelection($propertyName));
                     return $value->jsonSerialize();
-                } elseif ($value instanceof \DateTime
+                } elseif ($value instanceof \DateTimeInterface
                     && $property && $property->getType() === Entity\Reflection\Property::TYPE_DATE
                 ) {
                     $a = (array)$value;
