@@ -83,6 +83,10 @@ class ManyToOne extends Association
             return [];
         }
 
+        if (isset($result[0]) && count($result) === 1) {
+            $result = $result[0];
+        }
+
         return Association::groupResult(
             $result,
             [$this->targetReflection->getPrimaryProperty()->getUnmapped()]
