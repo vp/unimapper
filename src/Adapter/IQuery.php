@@ -10,5 +10,7 @@ interface IQuery
     public function setAssociations(array $associations, array $associationsFilters = []);
 
     public function getRaw();
+    
+    public function addOption($name, $value);
 
 }

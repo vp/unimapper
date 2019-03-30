@@ -31,7 +31,7 @@ class ManyToMany extends Association
         Entity\Reflection $targetReflection,
         array $definition = []
     ) {
-        parent::__construct($sourceReflection, $targetReflection);
+        parent::__construct($sourceReflection, $targetReflection, $definition);
 
         if (!$targetReflection->hasPrimary()) {
             throw new AssociationException(
@@ -132,6 +132,8 @@ class ManyToMany extends Association
 
         $targetQuery->setFilter($targetFilter);
 
+        $this->addQueryOptionFromDefinitions($targetQuery);
+        
         $targetResult = $targetAdapter->execute($targetQuery);
         if (!$targetResult) {
             return [];

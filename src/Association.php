@@ -25,6 +25,9 @@ class Association
     /** @var  array */
     private static $_customAssociations;
 
+    /** @var array */
+    private $definitions = [];
+    
     /**
      * @param Reflection $sourceReflection
      * @param Reflection $targetReflection
@@ -33,12 +36,18 @@ class Association
      */
     public function __construct(
         Reflection $sourceReflection,
-        Reflection $targetReflection
+        Reflection $targetReflection,
+        array $definitions = []
     ) {
         $this->sourceReflection = $sourceReflection;
         $this->targetReflection = $targetReflection;
+        $this->definitions = $definitions;
     }
 
+    public function getDefinition($name, $default = null) {
+        return isset($this->definitions[$name]) ? $this->definitions[$name] : $default;
+    }
+    
     /**
      * Key name that refers target results to source entity
      *
@@ -208,4 +217,19 @@ class Association
         throw new AssociationException('Save not implemented for association!');
     }
 
+
+    /**
+     * @param \UniMapper\Adapter\IQuery $query
+     */
+    protected function addQueryOptionFromDefinitions(\UniMapper\Adapter\IQuery $query)
+    {
+        $queryParameters = $this->getDefinition('query-parameters');
+        if ($queryParameters) {
+            $rows = explode('|', $queryParameters);
+            foreach ($rows as $row) {
+                list($k, $v) = explode('=', $row);
+                $query->addOption($k, $v);
+            }
+        }
+    }
 }

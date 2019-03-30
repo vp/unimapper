@@ -8,20 +8,6 @@ use UniMapper\Exception\AssociationException;
 abstract class CustomAssociation extends \UniMapper\Association
 {
 
-    /**
-     * @param Reflection $sourceReflection
-     * @param Reflection $targetReflection
-     *
-     * @throws AssociationException
-     */
-    public function __construct(
-        Reflection $sourceReflection,
-        Reflection $targetReflection
-    ) {
-        $this->sourceReflection = $sourceReflection;
-        $this->targetReflection = $targetReflection;
-    }
-
     public function associate(
         \UniMapper\Adapter $adapter,
         \UniMapper\Entity\Reflection\Property\Option\Assoc $association,

@@ -21,7 +21,7 @@ class ManyToOne extends Association
         Reflection $targetReflection,
         array $definition = []
     ) {
-        parent::__construct($sourceReflection, $targetReflection);
+        parent::__construct($sourceReflection, $targetReflection, $definition);
 
         if (!$targetReflection->hasPrimary()) {
             throw new AssociationException(
@@ -76,6 +76,8 @@ class ManyToOne extends Association
         }
 
         $query->setFilter($targetFilter);
+
+        $this->addQueryOptionFromDefinitions($query);
 
         $result = $targetAdapter->execute($query);
 
