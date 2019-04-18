@@ -159,6 +159,9 @@ trait Selectable
         if (empty($this->selection)) {
             // select entity properties
             $selection = \UniMapper\Entity\Selection::generateEntitySelection($this->reflection);
+        } else if (count($this->selection) === 1 && $this->selection[0] === '*' ) {
+            // select all
+            $selection = [];
         } else {
             // use provided
             $selection = \UniMapper\Entity\Selection::checkEntitySelection($this->reflection, $this->selection);

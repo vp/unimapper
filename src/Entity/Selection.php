@@ -222,6 +222,9 @@ class Selection
                     . $reflection->getClassName() . "!"
                 );
             }
+            if ($propertyName === '*' && count($selection) === 1) {
+               return;
+            }
 
             if (!$reflection->hasProperty($propertyName)) {
                 throw new \UniMapper\Exception\QueryException(
