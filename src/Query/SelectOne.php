@@ -83,7 +83,7 @@ class SelectOne extends \UniMapper\Query
                 $associationSelection = $this->createAdapterSelection(
                     $mapper,
                     $definition->getTargetReflection(),
-                    $selection[$colName]
+                    $finalSelection[$colName]
                 );
 
                 $associationFilter = $mapper->unmapFilter(
