@@ -56,11 +56,12 @@ class Select extends \UniMapper\Query
         }
 
         $selection = $this->createQuerySelection();
+        $finalSelection = $this->addAssocSelections($selection);
         $remoteAssociations = $this->createRemoteAssociations();
 
         $query = $adapter->createSelect(
             $this->reflection->getAdapterResource(),
-            $this->createAdapterSelection($mapper, $this->reflection, $selection, $this->assocDefinitions, $remoteAssociations),
+            $this->createAdapterSelection($mapper, $this->reflection, $finalSelection, $this->assocDefinitions, $remoteAssociations),
             $this->orderBy,
             $this->limit,
             $this->offset

@@ -63,6 +63,9 @@ class Selection
         $returnSelection = [];
         foreach ($selection as $index => $value) {
             if (is_scalar($value)) {
+                if (!$reflection->hasProperty($value)) {
+                    continue;
+                }
                 $property = $reflection->getProperty($value);
                 if ($property->getType() === Reflection\Property::TYPE_ENTITY
                     || $property->getType() === Reflection\Property::TYPE_COLLECTION
@@ -73,6 +76,9 @@ class Selection
                     $returnSelection[$index] = $value;
                 }
             } else if (is_array($value)) {
+                if (!$reflection->hasProperty($index)) {
+                    continue;
+                }
                 $property = $reflection->getProperty($index);
                 if ($property->getType() === Reflection\Property::TYPE_ENTITY
                     || $property->getType() === Reflection\Property::TYPE_COLLECTION
@@ -226,7 +232,7 @@ class Selection
                return;
             }
 
-            if (!$reflection->hasProperty($propertyName)) {
+            if (!$reflection->hasDefinedProperty($propertyName)) {
                 throw new \UniMapper\Exception\QueryException(
                     "Property '" . $propertyName . "' is not defined on entity "
                     . $reflection->getClassName() . "!"

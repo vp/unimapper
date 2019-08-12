@@ -35,6 +35,8 @@ class Reflection
 
     /** @var string Entity values iterator */
     public static $entityIterator = '\UniMapper\Entity\Iterator';
+    
+    public static $defaultEntityIterationOptions = [];
 
     /**
      * @param string $class Entity class name
@@ -252,6 +254,21 @@ class Reflection
     {
         return isset($this->properties[$name]);
     }
+    
+    public function hasPublicProperty($name) {
+        return isset($name, $this->publicProperties);
+    }
+    
+    public function hasComputedProperty($name) {
+        return in_array($name, $this->computedProperties);
+    }
+    
+    public function hasDefinedProperty($name) {
+        return
+            $this->hasProperty($name)
+            || $this->hasPublicProperty($name)
+            || $this->hasComputedProperty($name);
+    }
 
     /**
      * Get property reflection object
@@ -356,6 +373,6 @@ class Reflection
      */
     public function createIterator(Entity $entity, array $options = []) {
         $class = $this::$entityIterator;
-        return new $class($entity, $options);
+        return new $class($entity, $options ? $options : self::$defaultEntityIterationOptions);
     }
 }

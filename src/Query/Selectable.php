@@ -178,27 +178,7 @@ trait Selectable
                 $selection[] = $primaryName;
             }
         }
-
-        foreach ($this->assocDefinitions as $propertyName => $definition) {
-            //- get from selection
-            $targetSelection = isset($selection[$propertyName]) ? $selection[$propertyName] : [];
-
-            //- look if is set on association annotation
-            if (isset($this->assocSelections[$propertyName]) && $this->assocSelections[$propertyName]) {
-                $targetSelection = array_unique(array_merge($targetSelection, $this->assocSelections[$propertyName]));
-            }
-
-            // if no selection for associated property provided
-            if (!$targetSelection) {
-                //- then generate it
-                $targetReflection = $definition->getTargetReflection();
-                $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
-            }
-
-            // set it
-            $selection[$propertyName] = $targetSelection;
-        }
-
+        
         return $selection;
     }
 
@@ -222,6 +202,31 @@ trait Selectable
             $associations,
             $remoteAssociations
         );
+    }
+
+    protected function addAssocSelections(array $selection)
+    {
+        $result = $selection;
+        foreach ($this->assocDefinitions as $propertyName => $definition) {
+            //- get from selection
+            $targetSelection = isset($result[$propertyName]) ? $result[$propertyName] : [];
+
+            //- look if is set on association annotation
+            if (isset($this->assocSelections[$propertyName]) && $this->assocSelections[$propertyName]) {
+                $targetSelection = array_unique(array_merge($targetSelection, $this->assocSelections[$propertyName]));
+            }
+
+            // if no selection for associated property provided
+            if (!$targetSelection) {
+                //- then generate it
+                $targetReflection = $definition->getTargetReflection();
+                $targetSelection = \UniMapper\Entity\Selection::generateEntitySelection($targetReflection);
+            }
+
+            // set it
+            $result[$propertyName] = $targetSelection;
+        }
+        return $result;
     }
 
 }
